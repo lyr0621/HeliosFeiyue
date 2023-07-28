@@ -63,10 +63,10 @@ public class RobotContainer {
         switch (Constants.CURRENT_MODE) {
             case HELIOS_V1:
                 m_drive = new SwerveDrivetrain();
-                m_wrist = new WristSubsystem();
+                // m_wrist = new WristSubsystem();
                 m_arm = new ArmAngleSubsystem();
                 m_ext = new ArmExtSubsystem();
-                m_super = new ArmSupersystem(m_arm, m_ext, m_wrist, m_drive);
+//                m_super = new ArmSupersystem(m_arm, m_ext, m_wrist, m_drive);
                 m_foot = new FootPedal(1);
                 break;
 
@@ -86,7 +86,7 @@ public class RobotContainer {
         
         // Configure the button bindings
         configureButtonBindings();
-        configDashboard();
+        // configDashboard();
     }
 
     /**
@@ -96,15 +96,15 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        m_drive.setDefaultCommand(new SwerveTeleopDrive(m_drive, m_driveController));
-        m_arm.setDefaultCommand(new HoldArmAngleCommand(m_arm));
+//        m_drive.setDefaultCommand(new SwerveTeleopDrive(m_drive, m_driveController));
+//        m_arm.setDefaultCommand(new HoldArmAngleCommand(m_arm));
 
 
         m_driveController.button(7).onTrue(m_drive.resetGyroBase());
 
-        m_driveController.a().whileTrue(newWrist.setWristPowerCommand(.5));
-        m_driveController.a().whileFalse(newWrist.setWristPowerCommand(0));
-        
+        m_driveController.a().whileTrue(newWrist.setWristPowerCommand(.25)).whileFalse(newWrist.setWristPowerCommand(0));
+        m_driveController.b().whileTrue(newWrist.setWristPowerCommand(-.25)).whileFalse(newWrist.setWristPowerCommand(0));
+
 //
 //        m_driveController.leftTrigger().whileTrue(new IntakeControlCommand(m_wrist, -0.5));
 //        m_driveController.rightTrigger().whileTrue(new IntakeControlCommand(m_wrist, 1.0));
@@ -179,8 +179,8 @@ public class RobotContainer {
                 .andThen(m_autoFactory.getAutoRoutine());
     }
 
-    public ArmSupersystem getArmSupersystem() {
-        return m_super;
-    }
+//    public ArmSupersystem getArmSupersystem() {
+//        return m_super;
+//    }
 
 }

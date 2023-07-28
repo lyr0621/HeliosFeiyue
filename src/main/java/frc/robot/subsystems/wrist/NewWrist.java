@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import lib.factories.SparkMaxFactory;
 
 public class NewWrist extends SubsystemBase {
     CANSparkMax turningMotor;
@@ -23,17 +24,15 @@ public class NewWrist extends SubsystemBase {
      * initializes the wrist
      */
     public NewWrist() {
-//        SparkMaxFactory.SparkMaxConfig sparkMaxConfig = new SparkMaxFactory.SparkMaxConfig();
-//        sparkMaxConfig.setInverted(true);
-//        sparkMaxConfig.setIdleMode(CANSparkMax.IdleMode.kBrake);
-//        sparkMaxConfig.setCurrentLimit(20);
-//
-//        SparkMaxFactory.Companion.createSparkMax(Constants.WristConstants.WRIST_ID, config);
+        SparkMaxFactory.SparkMaxConfig sparkMaxConfig = new SparkMaxFactory.SparkMaxConfig();
+        sparkMaxConfig.setInverted(true);
+        sparkMaxConfig.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        sparkMaxConfig.setCurrentLimit(20);
 
-        turningMotor = new CANSparkMax(Constants.WristConstants.WRIST_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
+        turningMotor = SparkMaxFactory.Companion.createSparkMax(Constants.WristConstants.WRIST_ID, sparkMaxConfig);
         turningEncoder = new CANCoder(Constants.WristConstants.WRIST_ANGLE_PORT);
         turingLimitSwitch = new DigitalInput(Constants.WristConstants.LIMIT_SWITCH_PORT);
-        intakeMotor = new CANSparkMax(Constants.WristConstants.INTAKE_ID, CANSparkMaxLowLevel.MotorType.kBrushless);
+        intakeMotor = SparkMaxFactory.Companion.createSparkMax(Constants.WristConstants.INTAKE_ID, sparkMaxConfig);
     }
 
     /**
@@ -53,6 +52,7 @@ public class NewWrist extends SubsystemBase {
     }
 
     public void setWristMotorPower(double desiredPower) {
+        if (desiredPower < 0 && limitReached()) desiredPower = 0;
         turningMotor.set(desiredPower);
     }
 
@@ -87,7 +87,7 @@ public class NewWrist extends SubsystemBase {
 
 
     public Command setWristPowerCommand(double speed) {
-        if (Math.abs(speed) < .1) speed = Math.copySign(.1, speed);
+        // if (Math.abs(speed) < .1) speed = Math.copySign(.1, speed);
 
         double finalSpeed = speed;
         return runOnce(() -> setWristMotorPower(finalSpeed));
