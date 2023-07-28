@@ -13,6 +13,7 @@ import frc.robot.commands.*;
 import frc.robot.commands.autonomous.AutoFactory;
 import frc.robot.commands.autonomous.Balance;
 import frc.robot.subsystems.arm.ArmExtSubsystem;
+import frc.robot.subsystems.wrist.NewWrist;
 import frc.robot.supersystems.ArmPose;
 import frc.robot.supersystems.ArmSupersystem;
 import lib.controllers.FootPedal;
@@ -40,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class RobotContainer {
     //Subsystems
     private WristSubsystem m_wrist;
+    private NewWrist newWrist;
     private SwerveDrivetrain m_drive;
     private ArmAngleSubsystem m_arm;
     private ArmExtSubsystem m_ext;
@@ -79,6 +81,8 @@ public class RobotContainer {
 
         m_autoFactory = new AutoFactory(m_super, m_drive, m_wrist, m_ext);
 
+        newWrist = new NewWrist();
+
         
         // Configure the button bindings
         configureButtonBindings();
@@ -98,21 +102,25 @@ public class RobotContainer {
 
         m_driveController.button(7).onTrue(m_drive.resetGyroBase());
 
-        m_driveController.leftTrigger().whileTrue(new IntakeControlCommand(m_wrist, -0.5));
-        m_driveController.rightTrigger().whileTrue(new IntakeControlCommand(m_wrist, 1.0));
-
-        m_driveController.y().whileTrue(
-            new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.INTAKE_BATTERY)
-                    .alongWith(new IntakeControlCommand(m_wrist, 1.0, m_driveController.getHID())));
-
-        m_driveController.a().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.STOW_POSITION));
-        m_driveController.b().whileTrue(
-                new SupersystemToPoseCommand(m_super, new ArmPose(0.0, () -> Constants.ArmSetpoints.HUMAN_HEIGHT.getValue(), () -> Constants.ArmSetpoints.HUMAN_WRIST.getValue()))
-                        .alongWith(new IntakeControlCommand(m_wrist, 1.0, m_driveController.getHID())));
-
-
-        m_driveController.leftBumper().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.HIGH_GOAL));
-        m_driveController.rightBumper().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.MIDDLE_GOAL));
+        m_driveController.a().whileTrue(newWrist.setWristPowerCommand(.5));
+        m_driveController.a().whileFalse(newWrist.setWristPowerCommand(0));
+        
+//
+//        m_driveController.leftTrigger().whileTrue(new IntakeControlCommand(m_wrist, -0.5));
+//        m_driveController.rightTrigger().whileTrue(new IntakeControlCommand(m_wrist, 1.0));
+//
+//        m_driveController.y().whileTrue(
+//            new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.INTAKE_BATTERY)
+//                    .alongWith(new IntakeControlCommand(m_wrist, 1.0, m_driveController.getHID())));
+//
+//        m_driveController.a().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.STOW_POSITION));
+//        m_driveController.b().whileTrue(
+//                new SupersystemToPoseCommand(m_super, new ArmPose(0.0, () -> Constants.ArmSetpoints.HUMAN_HEIGHT.getValue(), () -> Constants.ArmSetpoints.HUMAN_WRIST.getValue()))
+//                        .alongWith(new IntakeControlCommand(m_wrist, 1.0, m_driveController.getHID())));
+//
+//
+//        m_driveController.leftBumper().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.HIGH_GOAL));
+//        m_driveController.rightBumper().whileTrue(new SupersystemToPoseCommand(m_super, Constants.ArmSetpoints.MIDDLE_GOAL));
     }
 
     /**
