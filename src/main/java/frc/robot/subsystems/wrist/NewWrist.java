@@ -1,6 +1,7 @@
 package frc.robot.subsystems.wrist;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.time.StopWatch;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.math.controller.PIDController;
@@ -16,9 +17,8 @@ public class NewWrist extends SubsystemBase {
     DigitalInput turingLimitSwitch;
     CANSparkMax intakeMotor;
 
-    private double desiredAngle = 0.0;
-
-    private static final PIDController wristPID = new PIDController(Constants.WristConstants.WRIST_KP, Constants.WristConstants.WRIST_KI, Constants.WristConstants.WRIST_KD);
+    // private final PIDController wristPID = new PIDController(Constants.WristConstants.WRIST_KP, Constants.WristConstants.WRIST_KI, Constants.WristConstants.WRIST_KD);
+    private final PIDController wristPID = new PIDController(0, 0, 0);
 
     /**
      * initializes the wrist
@@ -41,14 +41,6 @@ public class NewWrist extends SubsystemBase {
      */
     public double getWristDegrees() {
         return (turningEncoder.getPosition() * (360/4096));
-    }
-
-    /**
-     * set the desired angle of the wrist
-     * @param desiredAngle
-     */
-    public void setWristAngle(double desiredAngle) {
-        turningEncoder.setPosition(desiredAngle);
     }
 
     public void setWristMotorPower(double desiredPower) {
@@ -78,6 +70,23 @@ public class NewWrist extends SubsystemBase {
 
     public boolean limitReached() {
         return !turingLimitSwitch.get();
+    }
+
+    /**
+     * set the desired angle of the wrist, and update motor speed according to PID
+     * @param desiredAngle
+     */
+    public void setWristAngle(double desiredAngle) {
+        if (Math.abs(getWristDegrees() - desiredAngle) < 5) {
+            setWristMotorPower(0);
+            return;
+        }
+        
+        double correctionPower = wristPID.calculate(getWristDegrees(), desiredAngle);
+        if (Math.abs(correctionPower) < .1) correctionPower = Math.copySign(.1, correctionPower);
+        if (Math.abs(correctionPower) > .3) correctionPower = Math.copySign(.3, correctionPower);
+
+        setWristMotorPower(correctionPower);
     }
 
     @Override
