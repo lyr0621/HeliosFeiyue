@@ -105,6 +105,8 @@ public class RobotContainer {
         m_driveController.a().whileTrue(newWrist.setWristPowerCommand(.25)).whileFalse(newWrist.setWristPowerCommand(0));
         m_driveController.b().whileTrue(newWrist.setWristPowerCommand(-.25)).whileFalse(newWrist.setWristPowerCommand(0));
 
+        m_driveController.x().whileTrue(newWrist.setWristPosition(90)).whileFalse(newWrist.setWristPowerCommand(0));
+
 //
 //        m_driveController.leftTrigger().whileTrue(new IntakeControlCommand(m_wrist, -0.5));
 //        m_driveController.rightTrigger().whileTrue(new IntakeControlCommand(m_wrist, 1.0));

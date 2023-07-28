@@ -1,11 +1,16 @@
 package frc.robot.subsystems.wrist;
 
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix.time.StopWatch;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -18,7 +23,7 @@ public class NewWrist extends SubsystemBase {
     CANSparkMax intakeMotor;
 
     // private final PIDController wristPID = new PIDController(Constants.WristConstants.WRIST_KP, Constants.WristConstants.WRIST_KI, Constants.WristConstants.WRIST_KD);
-    private final PIDController wristPID = new PIDController(0, 0, 0);
+    private final ProfiledPIDController wristPID = new ProfiledPIDController(0.04, 0, 0.0003, new TrapezoidProfile.Constraints(3000, 3000));
 
     /**
      * initializes the wrist
@@ -33,6 +38,8 @@ public class NewWrist extends SubsystemBase {
         turningEncoder = new CANCoder(Constants.WristConstants.WRIST_ANGLE_PORT);
         turingLimitSwitch = new DigitalInput(Constants.WristConstants.LIMIT_SWITCH_PORT);
         intakeMotor = SparkMaxFactory.Companion.createSparkMax(Constants.WristConstants.INTAKE_ID, sparkMaxConfig);
+
+        // turningEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToZero);
     }
 
     /**
@@ -40,7 +47,7 @@ public class NewWrist extends SubsystemBase {
      * @return the degrees
      */
     public double getWristDegrees() {
-        return (turningEncoder.getPosition() * (360/4096));
+        return (turningEncoder.getPosition() / Constants.WristConstants.WRIST_PIVOT_RATIO);
     }
 
     public void setWristMotorPower(double desiredPower) {
@@ -48,8 +55,12 @@ public class NewWrist extends SubsystemBase {
         turningMotor.set(desiredPower);
     }
 
-    public void setWristZeroAngle() {
-        turningEncoder.setPosition(0);
+    public void setWristEncoderAngle(double degrees) {
+        turningEncoder.setPosition(degrees);
+    }
+
+    public void setWristEncoderToZeroAngle() {
+        setWristAngle(0);
     }
 
     private void setIntakeMotorPower(double desiredPower) {
@@ -77,21 +88,30 @@ public class NewWrist extends SubsystemBase {
      * @param desiredAngle
      */
     public void setWristAngle(double desiredAngle) {
-        if (Math.abs(getWristDegrees() - desiredAngle) < 5) {
-            setWristMotorPower(0);
-            return;
-        }
-        
-        double correctionPower = wristPID.calculate(getWristDegrees(), desiredAngle);
-        if (Math.abs(correctionPower) < .1) correctionPower = Math.copySign(.1, correctionPower);
+//        if (Math.abs(getWristDegrees() - desiredAngle) < 5) {
+//            setWristMotorPower(0);
+//            return;
+//        }
+
+        double correctionPower = wristPID.calculate(
+                getWristDegrees(),
+                MathUtil.clamp(desiredAngle, Constants.WristConstants.WRIST_LOWER_LIMIT, Constants.WristConstants.WRIST_UPPER_LIMIT)
+        );
+//        if (Math.abs(correctionPower) < .1) correctionPower = Math.copySign(.1, correctionPower);
         if (Math.abs(correctionPower) > .3) correctionPower = Math.copySign(.3, correctionPower);
+        // -0.3 <= x <= 0.3
 
         setWristMotorPower(correctionPower);
     }
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("wrist angle(degrees)", getWristDegrees());
+        if (limitReached()) setWristEncoderToZeroAngle();
+    }
 
+    public Command setWristPosition(double degrees) {
+        return run(() -> setWristAngle(degrees));
     }
 
 
