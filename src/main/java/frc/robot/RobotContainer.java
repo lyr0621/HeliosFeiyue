@@ -4,25 +4,19 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.led.*;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.commands.*;
 import frc.robot.commands.autonomous.AutoFactory;
 import frc.robot.commands.autonomous.Balance;
 import frc.robot.subsystems.arm.ArmExtSubsystem;
-import frc.robot.subsystems.wrist.NewWrist;
+import frc.robot.subsystems.wrist.PractiseWrist;
 import frc.robot.supersystems.ArmPose;
 import frc.robot.supersystems.ArmSupersystem;
 import lib.controllers.FootPedal;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.subsystems.LedSubsystem;
@@ -41,7 +35,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 public class RobotContainer {
     //Subsystems
     private WristSubsystem m_wrist;
-    private NewWrist newWrist;
+    private PractiseWrist practiseWrist;
     private SwerveDrivetrain m_drive;
     private ArmAngleSubsystem m_arm;
     private ArmExtSubsystem m_ext;
@@ -81,7 +75,7 @@ public class RobotContainer {
 
         m_autoFactory = new AutoFactory(m_super, m_drive, m_wrist, m_ext);
 
-        newWrist = new NewWrist();
+        practiseWrist = new PractiseWrist();
 
         
         // Configure the button bindings
@@ -102,10 +96,10 @@ public class RobotContainer {
 
         m_driveController.button(7).onTrue(m_drive.resetGyroBase());
 
-        m_driveController.a().whileTrue(newWrist.setWristPowerCommand(.25)).whileFalse(newWrist.setWristPowerCommand(0));
-        m_driveController.b().whileTrue(newWrist.setWristPowerCommand(-.25)).whileFalse(newWrist.setWristPowerCommand(0));
+        m_driveController.a().whileTrue(practiseWrist.setWristPowerCommand(.25)).whileFalse(practiseWrist.setWristPowerCommand(0));
+        m_driveController.b().whileTrue(practiseWrist.setWristPowerCommand(-.25)).whileFalse(practiseWrist.setWristPowerCommand(0));
 
-        m_driveController.x().whileTrue(newWrist.setWristPosition(90)).whileFalse(newWrist.setWristPowerCommand(0));
+        m_driveController.x().whileTrue(practiseWrist.setWristPosition(90)).whileFalse(practiseWrist.setWristPowerCommand(0));
 
 //
 //        m_driveController.leftTrigger().whileTrue(new IntakeControlCommand(m_wrist, -0.5));

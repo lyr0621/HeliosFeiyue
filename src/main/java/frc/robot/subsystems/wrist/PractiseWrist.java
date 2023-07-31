@@ -1,12 +1,8 @@
 package frc.robot.subsystems.wrist;
 
 import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.ctre.phoenix.time.StopWatch;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -16,7 +12,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import lib.factories.SparkMaxFactory;
 
-public class NewWrist extends SubsystemBase {
+/**
+ * the subsystem that runs the wrist of the robot, just for practise
+ * @Autor
+ */
+public class PractiseWrist extends SubsystemBase {
     CANSparkMax turningMotor;
     CANCoder turningEncoder;
     DigitalInput turingLimitSwitch;
@@ -28,7 +28,7 @@ public class NewWrist extends SubsystemBase {
     /**
      * initializes the wrist
      */
-    public NewWrist() {
+    public PractiseWrist() {
         SparkMaxFactory.SparkMaxConfig sparkMaxConfig = new SparkMaxFactory.SparkMaxConfig();
         sparkMaxConfig.setInverted(true);
         sparkMaxConfig.setIdleMode(CANSparkMax.IdleMode.kBrake);
