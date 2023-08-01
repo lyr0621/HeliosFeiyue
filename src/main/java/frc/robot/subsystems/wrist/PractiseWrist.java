@@ -76,7 +76,7 @@ public class PractiseWrist extends SubsystemBase {
     }
 
     public void setWristEncoderToZeroAngle() {
-        setWristAngle(0);
+        setWristEncoderAngle(0);
     }
 
     private void setIntakeMotorPower(double desiredPower) {
@@ -118,7 +118,7 @@ public class PractiseWrist extends SubsystemBase {
         double correctionPower = pidController.getMotorPower(getWristDegrees(), getWristDegreesPerSecond());
 
         SmartDashboard.putNumber("power", correctionPower);
-        System.out.println("    setting angle..." + "power"+ correctionPower);
+        System.out.println("   power"+ correctionPower);
         // setWristMotorPower(correctionPower);
     }
 
@@ -129,7 +129,7 @@ public class PractiseWrist extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("wrist angle(degrees)", getWristDegrees());
+        SmartDashboard.putNumber("wrist(degrees)", getWristDegrees());
         if (lowerLimitReached())
             setWristEncoderToZeroAngle();
     }

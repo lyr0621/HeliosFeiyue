@@ -173,6 +173,9 @@ public class EnhancedPIDController {
      * @return
      */
     private double getMotorPowerGoToPositionClassic(double currentPosition, double velocity, Task task) {
+         System.out.print("targeted Position: " + task.value);
+         System.out.print("  ,dt:" + dt.get());
+
         double predictedFuturePosition = currentPosition + velocity * pidProfile.getFeedForwardTime();
         double error = task.value - predictedFuturePosition;
         this.integralValue += (task.value - currentPosition) * dt.get();
@@ -551,7 +554,44 @@ public class EnhancedPIDController {
             return;
         }
 
-        public double getCurrentPathPosition() { // TODO make this a mathematical integration
+
+        public double getCurrentPathPosition() {
+            final double timeToFullyAccelerate = profile.maxVelocity / profile.maxAcceleration;
+            final double distanceTravelledDuringAccelerating = timeToFullyAccelerate * profile.maxVelocity / 2;
+            final double totalDistance = Math.abs(task.value - startingPosition);
+
+            double currentTime = task.getTaskTime();
+
+            if (distanceTravelledDuringAccelerating * 2 > totalDistance) {
+                if (currentTime < checkPoints[1].time)
+                    return startingPosition +
+                            profile.maxAcceleration * currentTime * currentTime / 2; // 1/2 at^2
+                if (currentTime < checkPoints[2].time)
+                    return startingPosition +
+                            profile.maxAcceleration * checkPoints[1].time * checkPoints[1].time / 2 +
+                            profile.maxAcceleration * checkPoints[1].time * (currentTime - checkPoints[1].time) - profile.maxAcceleration * (currentTime - checkPoints[1].time) * (currentTime - checkPoints[1].time) / 2;
+                return task.value;
+            }
+
+            System.out.print("(trapezoid)");
+
+            if (currentTime < checkPoints[1].time) // the second checkpoint is not passed yet(still acclerating)
+                return startingPosition +
+                        profile.maxAcceleration * currentTime * currentTime / 2; // 1/2 at^2
+            if (currentTime < checkPoints[2].time) // the third checkpoint is not passed yet(moving in full speed)
+                return startingPosition +
+                        distanceTravelledDuringAccelerating + // the distance travelled during the first triangle
+                        (currentTime - checkPoints[1].time) * profile.maxVelocity; // the distance travelled in full speed
+            if (currentTime < checkPoints[3].time) // the last checkpoint is not passed yet (deccelerating)
+                return startingPosition +
+                        distanceTravelledDuringAccelerating + // the distance travelled during the first triangle
+                        (checkPoints[2].time - checkPoints[1].time) * profile.maxVelocity + // the distance travelled in full speed
+                        profile.maxVelocity * (currentTime - checkPoints[2].time) - profile.maxAcceleration * (currentTime - checkPoints[2].time) * (currentTime - checkPoints[2].time) / 2; // 1/2at^2 + vt
+            return task.value; // when the process is already complete, stay in the current position
+        }
+
+        @Deprecated
+        public double getCurrentPathPositionIntegralTime() { // TODO make this a mathematical integration
             double dt = task.getTaskTime() - this.previousTime;
             if (task.value - startingPosition > 0)
                 currentPosition += dt * getCurrentSpeed();
@@ -560,8 +600,6 @@ public class EnhancedPIDController {
 
             this.previousTime = task.getTaskTime();
 
-            System.out.print("targeted Position: " + currentPosition);
-            System.out.print("  ,dt:" + dt);
             SmartDashboard.putNumber("scheduled Position", currentPosition);
 
             return currentPosition;
