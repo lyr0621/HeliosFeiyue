@@ -3,27 +3,35 @@ package frc.robot.subsystems.wrist;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Utils.EnhancedPIDController;
 import lib.factories.SparkMaxFactory;
 
 /**
  * the subsystem that runs the wrist of the robot, just for practise
- * @Autor
+ * @Autor Sam
  */
 public class PractiseWrist extends SubsystemBase {
     CANSparkMax turningMotor;
     CANCoder turningEncoder;
     DigitalInput turingLimitSwitch;
     CANSparkMax intakeMotor;
+    EnhancedPIDController.Task wristTask;
 
-    // private final PIDController wristPID = new PIDController(Constants.WristConstants.WRIST_KP, Constants.WristConstants.WRIST_KI, Constants.WristConstants.WRIST_KD);
-    private final ProfiledPIDController wristPID = new ProfiledPIDController(0.04, 0, 0.0003, new TrapezoidProfile.Constraints(3000, 3000));
+    private final EnhancedPIDController pidController = new EnhancedPIDController(
+            new EnhancedPIDController.DynamicalPIDProfile(
+                    0.3,
+                    0.05,
+                    3,
+                    0,
+                    0,
+                    120,
+                    60
+            ));
 
     /**
      * initializes the wrist
@@ -50,8 +58,16 @@ public class PractiseWrist extends SubsystemBase {
         return (turningEncoder.getPosition() / Constants.WristConstants.WRIST_PIVOT_RATIO);
     }
 
+    public double getWristDegreesPerSecond() {
+        return (turningEncoder.getVelocity() / Constants.WristConstants.WRIST_PIVOT_RATIO);
+    }
+
     public void setWristMotorPower(double desiredPower) {
-        if (desiredPower < 0 && limitReached()) desiredPower = 0;
+        if (desiredPower < 0 && lowerLimitReached())
+            desiredPower = 0;
+        else if (desiredPower > 0 && upperLimitReached())
+            desiredPower = 0;
+
         turningMotor.set(desiredPower);
     }
 
@@ -79,8 +95,12 @@ public class PractiseWrist extends SubsystemBase {
         }
     }
 
-    public boolean limitReached() {
+    public boolean lowerLimitReached() {
         return !turingLimitSwitch.get();
+    }
+
+    public boolean upperLimitReached() {
+        return getWristDegrees() > Constants.WristConstants.WRIST_UPPER_LIMIT;
     }
 
     /**
@@ -88,26 +108,26 @@ public class PractiseWrist extends SubsystemBase {
      * @param desiredAngle
      */
     public void setWristAngle(double desiredAngle) {
-//        if (Math.abs(getWristDegrees() - desiredAngle) < 5) {
-//            setWristMotorPower(0);
-//            return;
-//        }
+        desiredAngle = MathUtil.clamp(desiredAngle, Constants.WristConstants.WRIST_LOWER_LIMIT, Constants.WristConstants.WRIST_UPPER_LIMIT);
 
-        double correctionPower = wristPID.calculate(
-                getWristDegrees(),
-                MathUtil.clamp(desiredAngle, Constants.WristConstants.WRIST_LOWER_LIMIT, Constants.WristConstants.WRIST_UPPER_LIMIT)
-        );
-//        if (Math.abs(correctionPower) < .1) correctionPower = Math.copySign(.1, correctionPower);
-        if (Math.abs(correctionPower) > .3) correctionPower = Math.copySign(.3, correctionPower);
-        // -0.3 <= x <= 0.3
+        if (wristTask.taskType != EnhancedPIDController.Task.GO_TO_POSITION || wristTask.value != desiredAngle) {
+            wristTask = new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, desiredAngle);
+            pidController.startNewTask(wristTask, getWristDegrees());
+        }
 
-        setWristMotorPower(correctionPower);
+        double correctionPower = pidController.getMotorPower(getWristDegrees(), getWristDegreesPerSecond());
+
+        SmartDashboard.putNumber("power", correctionPower);
+        System.out.println("setting angle..." + "power"+ correctionPower);
+
+        // setWristMotorPower(correctionPower);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("wrist angle(degrees)", getWristDegrees());
-        if (limitReached()) setWristEncoderToZeroAngle();
+        if (lowerLimitReached())
+            setWristEncoderToZeroAngle();
     }
 
     public Command setWristPosition(double degrees) {
@@ -119,6 +139,6 @@ public class PractiseWrist extends SubsystemBase {
         // if (Math.abs(speed) < .1) speed = Math.copySign(.1, speed);
 
         double finalSpeed = speed;
-        return runOnce(() -> setWristMotorPower(finalSpeed));
+        return run(() -> setWristMotorPower(finalSpeed));
     }
 }
