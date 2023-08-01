@@ -2,6 +2,7 @@ package frc.robot.Utils;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * An enhanced version of the math utility: edu.wpi.first.math.controller.ProfiledPIDController
@@ -376,7 +377,7 @@ public class EnhancedPIDController {
                     minPowerToMove,
                     calculateErrorStartDecelerate(errorTolerance, maxAcceleration, maxVelocity),
                     errorTolerance,
-                    maxVelocity / maxAcceleration,
+                    maxVelocity / maxAcceleration, // the "think-forward" time is the time for fully decelerate, because that is the amount of time you want to save for deceleration
                     integralCoefficientError,
                     integralCoefficientVelocityDifference
             );
@@ -503,7 +504,7 @@ public class EnhancedPIDController {
                 throw new IllegalStateException("the current task type:" + task.taskType + "does not support trapezoid path schedule");
 
             this.profile = profile;
-            this.startingPosition = startingPosition;
+            this.currentPosition = this.startingPosition = startingPosition;
             this.task = task;
 
             scheduleCheckPoints();
@@ -550,27 +551,35 @@ public class EnhancedPIDController {
             return;
         }
 
-        public double getCurrentPathPosition() {
+        public double getCurrentPathPosition() { // TODO make this a mathematical integration
             double dt = task.getTaskTime() - this.previousTime;
-            currentPosition += dt * getCurrentVelocity();
+            if (task.value - startingPosition > 0)
+                currentPosition += dt * getCurrentSpeed();
+            else
+                currentPosition -= dt * getCurrentSpeed();
 
             this.previousTime = task.getTaskTime();
+
+            System.out.print("targeted Position: " + currentPosition);
+            System.out.print("  ,dt:" + dt);
+            SmartDashboard.putNumber("scheduled Position", currentPosition);
 
             return currentPosition;
         }
 
-        private double getCurrentVelocity() {
+        /** get the amount speed at the current time, according to the plan, note that direction will not be specified */
+        private double getCurrentSpeed() {
             /* if the task isn't started yet */
             if (task.getTaskTime() < 0)
                 return 0;
-            for (int currentCheckPoint = 1; currentCheckPoint <= checkPoints.length; currentCheckPoint++) {
+            for (int currentCheckPoint = 1; currentCheckPoint < checkPoints.length; currentCheckPoint++) {
                 if (task.getTaskTime() < checkPoints[currentCheckPoint].time) {
                     CheckPoint previousCheckPoint = checkPoints[currentCheckPoint-1];
                     CheckPoint nextCheckPoint = checkPoints[currentCheckPoint];
 
-                    double currentVelocity = previousCheckPoint.velocity + (task.getTaskTime() - previousCheckPoint.time) / (nextCheckPoint.time - previousCheckPoint.time);
+                    double requiredSpeed = previousCheckPoint.velocity + (task.getTaskTime() - previousCheckPoint.time) / (nextCheckPoint.time - previousCheckPoint.time);
 
-                    return currentVelocity;
+                    return requiredSpeed;
                 }
             }
             /* if the task is already over */

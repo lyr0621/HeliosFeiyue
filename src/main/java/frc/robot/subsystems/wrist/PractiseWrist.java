@@ -29,8 +29,8 @@ public class PractiseWrist extends SubsystemBase {
                     3,
                     0,
                     0,
-                    120,
-                    60
+                    200,
+                    100
             ));
 
     /**
@@ -110,7 +110,7 @@ public class PractiseWrist extends SubsystemBase {
     public void setWristAngle(double desiredAngle) {
         desiredAngle = MathUtil.clamp(desiredAngle, Constants.WristConstants.WRIST_LOWER_LIMIT, Constants.WristConstants.WRIST_UPPER_LIMIT);
 
-        if (wristTask.taskType != EnhancedPIDController.Task.GO_TO_POSITION || wristTask.value != desiredAngle) {
+        if (wristTask == null || wristTask.taskType != EnhancedPIDController.Task.GO_TO_POSITION || wristTask.value != desiredAngle) {
             wristTask = new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, desiredAngle);
             pidController.startNewTask(wristTask, getWristDegrees());
         }
@@ -118,9 +118,13 @@ public class PractiseWrist extends SubsystemBase {
         double correctionPower = pidController.getMotorPower(getWristDegrees(), getWristDegreesPerSecond());
 
         SmartDashboard.putNumber("power", correctionPower);
-        System.out.println("setting angle..." + "power"+ correctionPower);
-
+        System.out.println("    setting angle..." + "power"+ correctionPower);
         // setWristMotorPower(correctionPower);
+    }
+
+    public void resetGoToPositionProcess() {
+        this.wristTask = null;
+        setWristMotorPower(0);
     }
 
     @Override
