@@ -5,7 +5,6 @@ import java.util.HashMap;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Drivers.Encoders.CanCoder;
 import frc.robot.Drivers.Motors.CanSparkMaxMotor;
@@ -37,15 +36,8 @@ public class Robot extends LoggedRobot {
 
         CanCoder testEncoder = new CanCoder(8);
         CANSparkMax testMotor = new CANSparkMax(7, CANSparkMaxLowLevel.MotorType.kBrushless);
-        XboxController testController = new XboxController(1);
         @Override
         public void robotPeriodic() {
-                System.out.println(testEncoder.getEncoderVelocity());
-                if (testController.getAButton())
-                        testMotor.set(0.1);
-                else
-                        testMotor.set(0);
-
                 if (!isEnabled()) {
                         // System.out.println("<-- robot disabled -->");
                         this.initializationCompleted = false;
@@ -193,7 +185,9 @@ class RobotContainer {
 class PIDTest {
         private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,true);
         private final CanCoder testEncoder = new CanCoder(5, false);
+        private final XboxController controller = new XboxController(1);
         private final EnhancedPIDController pidController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
+                Math.PI * 2,
                 0.3,
                 0.07,
                 Math.toRadians(90),
@@ -221,6 +215,14 @@ class PIDTest {
                 double correctionPower = pidController.getMotorPower(currentPosition,currentVelocity);
                 SmartDashboard.putNumber("correction power", correctionPower);
 
-
+                testMotor.gainOwnerShip(null);
+                if (!controller.getAButton()) {
+                        correctionPower = 0;
+                        testMotor.setZeroPowerHoldStill(false);
+                }
+                else {
+                        testMotor.setZeroPowerHoldStill(true);
+                }
+                testMotor.setPower(correctionPower, null);
         }
 }

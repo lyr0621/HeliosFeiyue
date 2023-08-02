@@ -46,4 +46,11 @@ public class CanSparkMaxMotor extends RobotDriverBase implements MotorDriver {
     public void onDestroy() {
         canSparkMaxInstance.close();
     }
+
+    public void setZeroPowerHoldStill(boolean holdStill) {
+        if (holdStill)
+            this.canSparkMaxInstance.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        else
+            this.canSparkMaxInstance.setIdleMode(CANSparkMax.IdleMode.kCoast);
+    }
 }

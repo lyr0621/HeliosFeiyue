@@ -173,13 +173,11 @@ public class EnhancedPIDController {
      * @return
      */
     private double getMotorPowerGoToPositionClassic(double currentPosition, double velocity, Task task) {
-        System.out.print("targeted Position: " + task.value);
-        System.out.print("  ,dt:" + dt.get());
-
         double predictedFuturePosition = currentPosition + velocity * pidProfile.getFeedForwardTime();
-        double error = task.value - predictedFuturePosition;
-        this.integralValue += (task.value - currentPosition) * dt.get();
+        double error = getActualDifference(currentPosition, task.value);
+        this.integralValue += (getActualDifference(currentPosition, task.value)) * dt.get();
 
+        System.out.println("error:" + Math.toDegrees(error) + "; error tolerance:" + Math.toDegrees(pidProfile.getErrorTolerance())); // TODO test this part
         if (Math.abs(error) < pidProfile.getErrorTolerance())
             return 0;
 
@@ -195,13 +193,35 @@ public class EnhancedPIDController {
         return correctionPower;
     }
 
+    private double getActualDifference(double currentPosition, double targetedPosition) {
+        return getActualDifference(currentPosition, targetedPosition, pidProfile.loopLength);
+    }
+    public static double getActualDifference(double currentPosition, double targetedPosition, double loopLength) {
+        currentPosition = simplifyPosition(currentPosition, loopLength);
+        targetedPosition = simplifyPosition(targetedPosition, loopLength);
+        double difference = targetedPosition - currentPosition;
+        if (difference > loopLength / 2)
+            return loopLength - difference;
+        if (difference < -loopLength / 2)
+            return loopLength - difference;
+        return difference;
+    }
+
+    public static double simplifyPosition(double position, double loopLength) {
+        while (position > loopLength)
+            position -= loopLength;
+        while (position < 0)
+            position += loopLength;
+        return position;
+    }
+
     /**
      * gets the power required in order to go to the desired velocity
      * automatically schedules the acceleration/deceleration process
      * @param currentVelocity the current velocity of the mechanism, in whatever unit / second
      * @return motor power, in percentage output
      */
-    public double getMotorPowerSetToVelocityDynamic(double currentVelocity) {
+    public double getMotorPowerSetToVelocityDynamic(double currentVelocity) { // TODO apply loop control
         if (speedChangingProcess == null)
             speedChangingProcess = new SpeedChangingProcess(this.task, (DynamicalPIDProfile) pidProfile, currentVelocity);
         return getMotorPowerSetToVelocityClassic(
@@ -264,6 +284,8 @@ public class EnhancedPIDController {
     public static abstract class PIDProfile {
         /** whether this profile will update according to feedbacks of the robot */
         private final boolean dynamicallyAdjusting;
+        /** the length of the loop of the mechanism, meaning that the mechanism will jump back to zero at this point */
+        private final double loopLength;
 
         /** the restriction on power */
         private double maxPowerAllowed;
@@ -283,6 +305,7 @@ public class EnhancedPIDController {
         /**
          * Creates a new profile with the all settings given and fixed all the time
          * @param dynamicallyAdjusting whether this profile will update according to feedbacks of the robot
+         * @param loopLength the length of the loop of the mechanism, meaning that the mechanism will jump back to zero at this point, if no, use Float.infinity
          * @param maxPowerAllowed the restriction on power
          * @param minPowerToMove the amount of motor power required to make the mechanism moving
          * @param errorStartDecelerate the distance to target where the mechanism should start decelerate, the mechanism will otherwise move with full power
@@ -291,8 +314,10 @@ public class EnhancedPIDController {
          * @param errorIntegralCoefficient the coefficient of the cumulated error, also known as kI
          * @param velocityDifferenceIntegralCoefficient
          */
-        protected PIDProfile(boolean dynamicallyAdjusting, double maxPowerAllowed, double minPowerToMove, double errorStartDecelerate, double errorTolerance, double feedForwardTime, double errorIntegralCoefficient, double velocityDifferenceIntegralCoefficient) {
+        protected PIDProfile(boolean dynamicallyAdjusting, double loopLength, double maxPowerAllowed, double minPowerToMove, double errorStartDecelerate, double errorTolerance, double feedForwardTime, double errorIntegralCoefficient, double velocityDifferenceIntegralCoefficient) {
             this.dynamicallyAdjusting = dynamicallyAdjusting;
+
+            this.loopLength = loopLength;
 
             this.maxPowerAllowed = maxPowerAllowed;
             this.minPowerToMove = minPowerToMove;
@@ -341,6 +366,7 @@ public class EnhancedPIDController {
         /**
          * Creates a new profile with the all settings given and fixed all the time
          *
+         * @param loopLength the length of the loop of the mechanism, meaning that the mechanism will jump back to zero at this point
          * @param maxPowerAllowed                       the restriction on power
          * @param minPowerToMove                        the amount of motor power required to make the mechanism moving
          * @param errorStartDecelerate                  the distance to target where the mechanism should start decelerate, the mechanism will otherwise move with full power
@@ -349,8 +375,8 @@ public class EnhancedPIDController {
          * @param errorIntegralCoefficient              the coefficient of the cumulated error, also known as kI
          * @param velocityDifferenceIntegralCoefficient
          */
-        public StaticPIDProfile(double maxPowerAllowed, double minPowerToMove, double errorStartDecelerate, double errorTolerance, double feedForwardTime, double errorIntegralCoefficient, double velocityDifferenceIntegralCoefficient) {
-            super(false, maxPowerAllowed, minPowerToMove, errorStartDecelerate, errorTolerance, feedForwardTime, errorIntegralCoefficient, velocityDifferenceIntegralCoefficient);
+        public StaticPIDProfile(double loopLength, double maxPowerAllowed, double minPowerToMove, double errorStartDecelerate, double errorTolerance, double feedForwardTime, double errorIntegralCoefficient, double velocityDifferenceIntegralCoefficient) {
+            super(false, loopLength, maxPowerAllowed, minPowerToMove, errorStartDecelerate, errorTolerance, feedForwardTime, errorIntegralCoefficient, velocityDifferenceIntegralCoefficient);
         }}
 
     /**
@@ -365,6 +391,7 @@ public class EnhancedPIDController {
 
         /**
          * Creates a dynamically adjusting PID profile with the following params, and estimates other params automatically
+         * @param loopLength the length of the loop of the mechanism, meaning that the mechanism will jump back to zero at this point
          * @param maxPowerAllowed the restriction on power
          * @param minPowerToMove the amount of motor power required to make the mechanism moving
          * @param errorTolerance the amount of error to ignore
@@ -373,9 +400,10 @@ public class EnhancedPIDController {
          * @param maxAcceleration the maximum instant acceleration that the mechanism can achieve with the max power
          * @param maxVelocity the restriction on the velocity of the mechanism
          */
-        public DynamicalPIDProfile(double maxPowerAllowed, double minPowerToMove, double errorTolerance, double integralCoefficientError, double integralCoefficientVelocityDifference, double maxAcceleration, double maxVelocity) {
+        public DynamicalPIDProfile(double loopLength, double maxPowerAllowed, double minPowerToMove, double errorTolerance, double integralCoefficientError, double integralCoefficientVelocityDifference, double maxAcceleration, double maxVelocity) {
             super(
                     true,
+                    loopLength,
                     maxPowerAllowed,
                     minPowerToMove,
                     calculateErrorStartDecelerate(errorTolerance, maxAcceleration, maxVelocity),
