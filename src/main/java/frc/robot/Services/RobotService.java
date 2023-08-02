@@ -26,6 +26,9 @@ public abstract class RobotService extends RobotModuleOperatorMarker {
     /** called during initialization */
     abstract public void init(HashMap<String, RobotModuleBase> dependencyModules, HashMap<String, Object> params);
 
+    /** called to reset service to initial state, you can also call it by the end of init() */
+    public abstract void reset();
+
     /** called during every loop */
     abstract public void periodic();
 

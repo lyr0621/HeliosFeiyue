@@ -73,12 +73,16 @@ public class PilotChassis extends RobotService {
         /* declare the pilot's controller joy stick */
         this.pilotControllerStick = new Joystick(robotConfig.controlConfigs.get("pilotControllerPort"));
 
+        // System.out.println("<--pilot chassis initialize complete-->");
+        reset();
+    }
+
+    @Override
+    public void reset() {
         /* calibrate its center */
         this.controllerTranslationStickCenter = new Vector2D(
                 new double[] { pilotControllerStick.getX(), pilotControllerStick.getY() });
         this.controllerRotationStickCenter = pilotControllerStick.getZ();
-
-        System.out.println("<--pilot chassis initialize complete-->");
     }
 
     @Override

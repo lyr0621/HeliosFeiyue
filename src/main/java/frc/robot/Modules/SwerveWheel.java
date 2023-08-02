@@ -146,7 +146,7 @@ public class SwerveWheel extends RobotModuleBase {
         System.out.println("wheel direction" + wheelPositionVector);
         System.out.println("rotation direction: " + rotationDirectionVector);
 
-        lastOperationTimer.start();
+        reset();
     }
 
     @Override
@@ -203,6 +203,11 @@ public class SwerveWheel extends RobotModuleBase {
             drivingMotor.setPower(targetedSpeed * -1, this);
         else
             drivingMotor.setPower(targetedSpeed, this);
+    }
+
+    @Override
+    public void reset() {
+        lastOperationTimer.start();
     }
 
     /**

@@ -17,6 +17,11 @@ public class DebugBridge extends RobotService {
     }
 
     @Override
+    public void reset() {
+
+    }
+
+    @Override
     public void periodic() {
 
     }

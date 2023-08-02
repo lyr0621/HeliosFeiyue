@@ -18,6 +18,7 @@ public class CanSparkMaxMotor extends RobotDriverBase implements MotorDriver {
     }
 
     public CanSparkMaxMotor(int portID, boolean reversed) {
+        System.out.println("initializing motor:" + portID);
         this.portID = portID;
         this.powerAndEncoderScaleFactor = reversed ? -1 : 1;
         this.canSparkMaxInstance = new CANSparkMax(portID, CANSparkMaxLowLevel.MotorType.kBrushless);

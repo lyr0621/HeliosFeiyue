@@ -35,7 +35,7 @@ public class Robot extends LoggedRobot {
                         return;
                 }
                 if (!initializationCompleted)
-                        robotInit();
+                        test.testReset();
 
                 // System.out.println("<-- robot main loop -->");
                 test.testPeriodic();
@@ -51,15 +51,27 @@ public class Robot extends LoggedRobot {
 
 class Test {
         private SwerveWheel frontLeftWheel, backLeftWheel, frontRightWheel, backRightWheel;
+        private SwerveBasedChassis chassisModule;
         private PilotChassis testChassis;
 
         public void testPeriodic() {
                 testChassis.periodic();
+                chassisModule.periodic();
+
 
                 frontLeftWheel.periodic();
                 // backLeftWheel.periodic();
                 // frontRightWheel.periodic();
                 // backRightWheel.periodic();
+        }
+
+        public void testReset() {
+                testChassis.reset();
+                chassisModule.reset();
+                frontLeftWheel.reset();
+                backLeftWheel.reset();
+                frontRightWheel.reset();
+                backRightWheel.reset();
         }
 
         public void testStart() {
@@ -131,7 +143,7 @@ class Test {
                 backRightWheelParams.put("robotConfig", robotConfig);
                 backRightWheel.init(null, backRightWheelParams);
 
-                SwerveBasedChassis chassisModule = new SwerveBasedChassis();
+                this.chassisModule = new SwerveBasedChassis();
                 HashMap<String, RobotModuleBase> chassisModuleDependencyModules = new HashMap<>(1);
                 chassisModuleDependencyModules.put("frontLeftWheelModule", frontLeftWheel);
                 chassisModuleDependencyModules.put("frontRightWheelModule", frontRightWheel);

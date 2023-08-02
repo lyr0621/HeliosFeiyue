@@ -62,11 +62,7 @@ public class SwerveBasedChassis extends RobotModuleBase {
         swerveWheels[2] = (SwerveWheel) dependencyModules.get("backLeftWheelModule");
         swerveWheels[3] = (SwerveWheel) dependencyModules.get("backRightWheelModule");
 
-        /* gains ownership to wheels */
-        swerveWheels[0].gainOwnerShip(this);
-        swerveWheels[1].gainOwnerShip(this);
-        swerveWheels[2].gainOwnerShip(this);
-        swerveWheels[3].gainOwnerShip(this);
+        this.reset();
     }
 
     @Override
@@ -74,6 +70,15 @@ public class SwerveBasedChassis extends RobotModuleBase {
         /* pass the robot motion params to each wheels */
         for (SwerveWheel wheel : swerveWheels)
             wheel.drive(desiredMotion, desiredRotationalPower, this);
+    }
+
+    @Override
+    public void reset() {
+        /* gains ownership to wheels */
+        swerveWheels[0].gainOwnerShip(this);
+        swerveWheels[1].gainOwnerShip(this);
+        swerveWheels[2].gainOwnerShip(this);
+        swerveWheels[3].gainOwnerShip(this);
     }
 
     @Override

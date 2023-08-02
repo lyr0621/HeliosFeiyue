@@ -42,6 +42,9 @@ public abstract class RobotModuleBase extends RobotModuleOperatorMarker {
     /** called during every loop */
     public abstract void periodic();
 
+    /** called to reset module to initial state, you can also call it by the end of init() */
+    public abstract void reset();
+
     /** called when the program ends */
     public abstract void onDestroy();
 
