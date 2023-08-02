@@ -41,4 +41,9 @@ public class CanSparkMaxMotor extends RobotDriverBase implements MotorDriver {
     public double getCurrentPower() {
         return currentPower;
     }
+
+    @Override
+    public void onDestroy() {
+        canSparkMaxInstance.close();
+    }
 }

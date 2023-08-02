@@ -85,13 +85,13 @@ public class EnhancedPIDController {
     public double getMotorPower(double currentPosition, double velocity) {
         double motorPower;
         switch (task.taskType) {
-            case Task.MAINTAIN_POSITION: {
+            case Task.MAINTAIN_POSITION: { // TODO not tested yet
                 if (!pidProfile.dynamicallyAdjusting)
                     throw new IllegalStateException("Cannot use this control mode since the PID profile offered is static");
                 motorPower = getMotorPowerMaintainPosition(currentPosition, velocity);
                 break;
             }
-            case Task.GO_TO_POSITION: {
+            case Task.GO_TO_POSITION: { // TODO not tested yet
                 if (pidProfile.dynamicallyAdjusting)
                     motorPower = getMotorPowerGoToPositionDynamic(currentPosition, velocity);
                 else
@@ -103,7 +103,7 @@ public class EnhancedPIDController {
                 // TODO write this part
                 break;
             }
-            case Task.SET_TO_SPEED: {
+            case Task.SET_TO_SPEED: { // good to go
                 if (pidProfile.dynamicallyAdjusting)
                     motorPower = getMotorPowerSetToVelocityDynamic(velocity);
                 else

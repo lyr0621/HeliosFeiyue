@@ -16,4 +16,7 @@ public interface MotorDriver {
 
     /** gain ownership to this motor */
     void gainOwnerShip(RobotModuleBase ownerModule);
+
+    /** destroy the motor so the resources are released */
+    void onDestroy();
 }

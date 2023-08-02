@@ -54,6 +54,11 @@ public class TalonFXMotor extends RobotDriverBase implements MotorDriver, Encode
         }
     }
 
+    @Override
+    public void onDestroy() {
+        disableMotor(ownerModule); // disable the motor, operate as its owner
+    }
+
     public void lockMotor(RobotModuleBase operatorModule) {
         if (isOwner(operatorModule)) {
             talonFXInstance.setNeutralMode(NeutralMode.Brake);

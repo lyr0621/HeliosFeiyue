@@ -5,12 +5,15 @@ import java.util.HashMap;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Drivers.Encoders.CanCoder;
+import frc.robot.Drivers.Motors.CanSparkMaxMotor;
 import frc.robot.Modules.RobotModuleBase;
 import frc.robot.Modules.SwerveBasedChassis;
 import frc.robot.Modules.SwerveWheel;
 import frc.robot.Services.PilotChassis;
+import frc.robot.Utils.EnhancedPIDController;
 import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Utils.Vector2D;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -49,7 +52,7 @@ public class Robot extends LoggedRobot {
                         return;
                 }
                 if (!initializationCompleted)
-                        test.testReset();
+                        test.testRestart();
 
                 // System.out.println("<-- robot main loop -->");
                 test.testPeriodic();
@@ -64,11 +67,46 @@ public class Robot extends LoggedRobot {
 }
 
 class Test {
+        private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,true);
+        private final CanCoder testEncoder = new CanCoder(5, false);
+        private final EnhancedPIDController pidController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
+                        0.3,
+                        0.07,
+                        Math.toRadians(90),
+                        Math.toRadians(1),
+                        0.2,
+                        0,
+                        0
+        ));
+        public void testStart() {
+                pidController.startNewTask(
+                        new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, 0),
+                        testEncoder.getEncoderPosition()
+                );
+        }
+
+        public void testRestart() {}
+
+        public void testPeriodic() {
+                double currentPosition = testEncoder.getEncoderPosition();
+                double currentVelocity = testEncoder.getEncoderVelocity();
+
+                SmartDashboard.putNumber("encoder position", currentPosition);
+                SmartDashboard.putNumber("encoder velocity", currentVelocity);
+
+                double correctionPower = pidController.getMotorPower(currentPosition,currentVelocity);
+                SmartDashboard.putNumber("correction power", correctionPower);
+
+                
+        }
+}
+
+class RobotContainer {
         private SwerveWheel frontLeftWheel, backLeftWheel, frontRightWheel, backRightWheel;
         private SwerveBasedChassis chassisModule;
         private PilotChassis testChassis;
 
-        public void testPeriodic() {
+        public void updateRobot() {
                  testChassis.periodic();
                  chassisModule.periodic();
 
@@ -79,7 +117,7 @@ class Test {
                  backRightWheel.periodic();
         }
 
-        public void testReset() {
+        public void restRobot() {
                 testChassis.reset();
                 chassisModule.reset();
                 frontLeftWheel.reset();
@@ -88,7 +126,7 @@ class Test {
                 backRightWheel.reset();
         }
 
-        public void testStart() {
+        public void startRobot() {
                 RobotConfigReader robotConfig;
                 try {
                         robotConfig = new RobotConfigReader();
@@ -100,13 +138,13 @@ class Test {
                 frontLeftWheel = new SwerveWheel();
                 HashMap<String, Object> frontLeftWheelParams = new HashMap<String, Object>(1);
                 frontLeftWheelParams.put("drivingMotorPort",
-                                robotConfig.hardwareConfigs.get("frontLeftWheelDriveMotor"));
+                        robotConfig.hardwareConfigs.get("frontLeftWheelDriveMotor"));
                 frontLeftWheelParams.put("steerMotorPort",
-                                robotConfig.hardwareConfigs.get("frontLeftWheelSteerMotor"));
+                        robotConfig.hardwareConfigs.get("frontLeftWheelSteerMotor"));
                 frontLeftWheelParams.put("CANCoderPort",
-                                robotConfig.hardwareConfigs.get("frontLeftWheelEncoder"));
+                        robotConfig.hardwareConfigs.get("frontLeftWheelEncoder"));
                 frontLeftWheelParams.put("coderBias",
-                                robotConfig.chassisConfigs.get("frontLeftWheelZeroPosition"));
+                        robotConfig.chassisConfigs.get("frontLeftWheelZeroPosition"));
                 frontLeftWheelParams.put("wheelID", 1);
                 frontLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, 1 }));
                 frontLeftWheelParams.put("robotConfig", robotConfig);
@@ -117,13 +155,13 @@ class Test {
                 backLeftWheel = new SwerveWheel();
                 HashMap<String, Object> backLeftWheelParams = new HashMap<String, Object>(1);
                 backLeftWheelParams.put("drivingMotorPort",
-                                robotConfig.hardwareConfigs.get("backLeftWheelDriveMotor"));
+                        robotConfig.hardwareConfigs.get("backLeftWheelDriveMotor"));
                 backLeftWheelParams.put("steerMotorPort",
-                                robotConfig.hardwareConfigs.get("backLeftWheelSteerMotor"));
+                        robotConfig.hardwareConfigs.get("backLeftWheelSteerMotor"));
                 backLeftWheelParams.put("CANCoderPort",
-                                robotConfig.hardwareConfigs.get("backLeftWheelEncoder"));
+                        robotConfig.hardwareConfigs.get("backLeftWheelEncoder"));
                 backLeftWheelParams.put("coderBias",
-                                robotConfig.chassisConfigs.get("backLeftWheelZeroPosition"));
+                        robotConfig.chassisConfigs.get("backLeftWheelZeroPosition"));
                 backLeftWheelParams.put("wheelID", 2);
                 backLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, -1 }));
                 backLeftWheelParams.put("robotConfig", robotConfig);
@@ -134,13 +172,13 @@ class Test {
                 frontRightWheel = new SwerveWheel();
                 HashMap<String, Object> frontRightWheelParams = new HashMap<String, Object>(1);
                 frontRightWheelParams.put("drivingMotorPort",
-                                robotConfig.hardwareConfigs.get("frontRightWheelDriveMotor"));
+                        robotConfig.hardwareConfigs.get("frontRightWheelDriveMotor"));
                 frontRightWheelParams.put("steerMotorPort",
-                                robotConfig.hardwareConfigs.get("frontRightWheelSteerMotor"));
+                        robotConfig.hardwareConfigs.get("frontRightWheelSteerMotor"));
                 frontRightWheelParams.put("CANCoderPort",
-                                robotConfig.hardwareConfigs.get("frontRightWheelEncoder"));
+                        robotConfig.hardwareConfigs.get("frontRightWheelEncoder"));
                 frontRightWheelParams.put("coderBias",
-                                robotConfig.chassisConfigs.get("frontRightWheelZeroPosition"));
+                        robotConfig.chassisConfigs.get("frontRightWheelZeroPosition"));
                 frontRightWheelParams.put("wheelID", 3);
                 frontRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, 1 }));
                 frontRightWheelParams.put("robotConfig", robotConfig);
@@ -151,13 +189,13 @@ class Test {
                 backRightWheel = new SwerveWheel();
                 HashMap<String, Object> backRightWheelParams = new HashMap<String, Object>(1);
                 backRightWheelParams.put("drivingMotorPort",
-                                robotConfig.hardwareConfigs.get("backRightWheelDriveMotor"));
+                        robotConfig.hardwareConfigs.get("backRightWheelDriveMotor"));
                 backRightWheelParams.put("steerMotorPort",
-                                robotConfig.hardwareConfigs.get("backRightWheelSteerMotor"));
+                        robotConfig.hardwareConfigs.get("backRightWheelSteerMotor"));
                 backRightWheelParams.put("CANCoderPort",
-                                robotConfig.hardwareConfigs.get("backRightWheelEncoder"));
+                        robotConfig.hardwareConfigs.get("backRightWheelEncoder"));
                 backRightWheelParams.put("coderBias",
-                                robotConfig.chassisConfigs.get("backRightWheelZeroPosition"));
+                        robotConfig.chassisConfigs.get("backRightWheelZeroPosition"));
                 backRightWheelParams.put("wheelID", 2);
                 backRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, -1 }));
                 backRightWheelParams.put("robotConfig", robotConfig);
