@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class SwerveBasedChassis extends RobotModuleBase {
     /** the four wheels of the robot */
-    private SwerveWheel[] swerveWheels;
+    private SwerveWheel[] swerveWheels = new SwerveWheel[4];
     /** the desired robot motion */
     private Vector2D desiredMotion = new Vector2D();
     /** the desired rotating power */
@@ -15,7 +15,7 @@ public class SwerveBasedChassis extends RobotModuleBase {
     /**
      * initializes the serve based chassis
      */
-    protected SwerveBasedChassis() {
+    public SwerveBasedChassis() {
         super("SwerveBasedChassis");
     }
 

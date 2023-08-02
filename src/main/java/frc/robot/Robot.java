@@ -2,12 +2,13 @@ package frc.robot;
 
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.TimedRobot;
 import frc.robot.Modules.RobotModuleBase;
+import frc.robot.Modules.SwerveBasedChassis;
 import frc.robot.Modules.SwerveWheel;
 import frc.robot.Services.PilotChassis;
 import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Utils.Vector2D;
+import org.littletonrobotics.junction.LoggedRobot;
 
 /**
  * The main program of the robot
@@ -20,7 +21,7 @@ import frc.robot.Utils.Vector2D;
  * @author Sam
  * @version 0.1
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 
         Test test = new Test();
         /** whether the init process has completed */
@@ -29,7 +30,7 @@ public class Robot extends TimedRobot {
         @Override
         public void robotPeriodic() {
                 if (!isEnabled()) {
-                        System.out.println("<-- robot disabled -->");
+                        // System.out.println("<-- robot disabled -->");
                         this.initializationCompleted = false;
                         return;
                 }
@@ -130,12 +131,19 @@ class Test {
                 backRightWheelParams.put("robotConfig", robotConfig);
                 backRightWheel.init(null, backRightWheelParams);
 
+                SwerveBasedChassis chassisModule = new SwerveBasedChassis();
+                HashMap<String, RobotModuleBase> chassisModuleDependencyModules = new HashMap<>(1);
+                chassisModuleDependencyModules.put("frontLeftWheelModule", frontLeftWheel);
+                chassisModuleDependencyModules.put("frontRightWheelModule", frontRightWheel);
+                chassisModuleDependencyModules.put("backLeftWheelModule", backLeftWheel);
+                chassisModuleDependencyModules.put("backRightWheelModule", backRightWheel);
+
+                chassisModule.init(chassisModuleDependencyModules, null);
+
+
                 testChassis = new PilotChassis();
                 HashMap<String, RobotModuleBase> pilotChassisServiceDependencyModules = new HashMap<>(1);
-                pilotChassisServiceDependencyModules.put("frontLeftWheelModule", frontLeftWheel);
-                pilotChassisServiceDependencyModules.put("frontRightWheelModule", frontRightWheel);
-                pilotChassisServiceDependencyModules.put("backLeftWheelModule", backLeftWheel);
-                pilotChassisServiceDependencyModules.put("backRightWheelModule", backRightWheel);
+                pilotChassisServiceDependencyModules.put("chassis", chassisModule);
 
                 HashMap<String, Object> pilotChassisServiceParams = new HashMap<>(1);
                 pilotChassisServiceParams.put("robotConfig", robotConfig);

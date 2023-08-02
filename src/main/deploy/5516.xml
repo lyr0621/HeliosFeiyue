@@ -1,0 +1,45 @@
+<robotConfig>
+    <hardware>
+        <frontLeftWheelDriveMotor type="int">3</frontLeftWheelDriveMotor>
+        <frontLeftWheelSteerMotor type="int">4</frontLeftWheelSteerMotor>
+        <frontLeftWheelEncoder type="int">10</frontLeftWheelEncoder>
+
+        <frontRightWheelDriveMotor type="int">1</frontRightWheelDriveMotor>
+        <frontRightWheelSteerMotor type="int">2</frontRightWheelSteerMotor>
+        <frontRightWheelEncoder type="int">9</frontRightWheelEncoder>
+
+        <backLeftWheelDriveMotor type="int">5</backLeftWheelDriveMotor>
+        <backLeftWheelSteerMotor type="int">6</backLeftWheelSteerMotor>
+        <backLeftWheelEncoder type="int">11</backLeftWheelEncoder>
+
+        <backRightWheelDriveMotor type="int">7</backRightWheelDriveMotor>
+        <backRightWheelSteerMotor type="int">8</backRightWheelSteerMotor>
+        <backRightWheelEncoder type="int">12</backRightWheelEncoder>
+    </hardware>
+    <chassis>
+        <!-- the zero position of encoders, to measure this value, turn the wheel to the direct front, and see the value of encoder.getRawSensorReading() -->
+        <frontLeftWheelZeroPosition type = "double">2.8486</frontLeftWheelZeroPosition>
+        <backLeftWheelZeroPosition type = "double">-0.15033012</backLeftWheelZeroPosition>
+        <frontRightWheelZeroPosition type = "double">2.9682528245587156</frontRightWheelZeroPosition>
+        <backRightWheelZeroPosition type = "double">3.1308547880745934</backRightWheelZeroPosition>
+
+        <!-- PID coefficients for steer wheels -->
+        <steerWheelErrorTolerance type = "double">1.2</steerWheelErrorTolerance> <!-- the amount of error to ignore, in degrees -->
+        <steerWheelErrorStartDecelerate type = "double">60</steerWheelErrorStartDecelerate> <!-- the amount of error where the motors should try to correct using full motor speed, in degrees -->
+        <steerWheelCorrectionPower type = "double">0.5</steerWheelCorrectionPower> <!-- use this value as the full speed -->
+        <steerWheelMinimumPower type = "double">0.06</steerWheelMinimumPower> <!-- this is the minimum amount of motor speed needed to turn the steer, in percentage of the full speed -->
+        <steerWheelVelocityDebugTime type = "double">0</steerWheelVelocityDebugTime>
+
+        <!-- the configuration of steer wheels -->
+        <maxUnusedTime type="double">100</maxUnusedTime>
+        <defaultPosition type="double">90</defaultPosition> <!--to straight forward-->
+    </chassis>
+    <control>
+        <pilotControllerXAxisSensitivity type="int">80</pilotControllerXAxisSensitivity>
+        <pilotControllerYAxisSensitivity type="int">-80</pilotControllerYAxisSensitivity>
+        <pilotControllerZAxisSensitivity type="int">-50</pilotControllerZAxisSensitivity>
+        <pilotControllerPort type = "int">0</pilotControllerPort>
+        <!-- the minimum amount of stick input to respond to, in percentage -->
+        <pilotStickThreshold type="int">15</pilotStickThreshold>
+    </control>
+</robotConfig>

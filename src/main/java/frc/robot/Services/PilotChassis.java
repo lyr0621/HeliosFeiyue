@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.Modules.SwerveBasedChassis;
-import frc.robot.Utils.EnhancedPIDController;
 import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Modules.RobotModuleBase;
 import frc.robot.Utils.Vector2D;

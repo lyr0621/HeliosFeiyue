@@ -128,7 +128,7 @@ public class SwerveWheel extends RobotModuleBase {
         this.lowestUsageSpeed = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
 
         /* initialize the motors */
-        this.drivingMotor = new TalonFXMotor(drivingMotorPort);
+        this.drivingMotor = new CanSparkMaxMotor(drivingMotorPort); // here are the motor settings
         drivingMotor.gainOwnerShip(this);
         this.steerMotor = new CanSparkMaxMotor(steerMotorPort, true);
         steerMotor.gainOwnerShip(this);
