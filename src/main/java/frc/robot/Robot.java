@@ -31,7 +31,7 @@ import org.littletonrobotics.junction.LoggedRobot;
  */
 public class Robot extends LoggedRobot {
 
-        Test test = new Test();
+        PIDTest test = new PIDTest();
         /** whether the init process has completed */
         boolean initializationCompleted = false;
 
@@ -63,41 +63,6 @@ public class Robot extends LoggedRobot {
                 System.out.println("<-- robot initialization -->");
                 test.testStart();
                 this.initializationCompleted = true;
-        }
-}
-
-class Test {
-        private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,true);
-        private final CanCoder testEncoder = new CanCoder(5, false);
-        private final EnhancedPIDController pidController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
-                        0.3,
-                        0.07,
-                        Math.toRadians(90),
-                        Math.toRadians(1),
-                        0.2,
-                        0,
-                        0
-        ));
-        public void testStart() {
-                pidController.startNewTask(
-                        new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, 0),
-                        testEncoder.getEncoderPosition()
-                );
-        }
-
-        public void testRestart() {}
-
-        public void testPeriodic() {
-                double currentPosition = testEncoder.getEncoderPosition();
-                double currentVelocity = testEncoder.getEncoderVelocity();
-
-                SmartDashboard.putNumber("encoder position", currentPosition);
-                SmartDashboard.putNumber("encoder velocity", currentVelocity);
-
-                double correctionPower = pidController.getMotorPower(currentPosition,currentVelocity);
-                SmartDashboard.putNumber("correction power", correctionPower);
-
-                
         }
 }
 
@@ -221,5 +186,41 @@ class RobotContainer {
                 pilotChassisServiceParams.put("robotConfig", robotConfig);
 
                 testChassis.init(pilotChassisServiceDependencyModules, pilotChassisServiceParams);
+        }
+}
+
+
+class PIDTest {
+        private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,true);
+        private final CanCoder testEncoder = new CanCoder(5, false);
+        private final EnhancedPIDController pidController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
+                0.3,
+                0.07,
+                Math.toRadians(90),
+                Math.toRadians(1),
+                0.2,
+                0,
+                0
+        ));
+        public void testStart() {
+                pidController.startNewTask(
+                        new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, 0),
+                        testEncoder.getEncoderPosition()
+                );
+        }
+
+        public void testRestart() {}
+
+        public void testPeriodic() {
+                double currentPosition = testEncoder.getEncoderPosition();
+                double currentVelocity = testEncoder.getEncoderVelocity();
+
+                SmartDashboard.putNumber("encoder position", currentPosition);
+                SmartDashboard.putNumber("encoder velocity", currentVelocity);
+
+                double correctionPower = pidController.getMotorPower(currentPosition,currentVelocity);
+                SmartDashboard.putNumber("correction power", correctionPower);
+
+
         }
 }
