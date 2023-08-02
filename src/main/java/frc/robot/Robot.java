@@ -2,6 +2,11 @@ package frc.robot;
 
 import java.util.HashMap;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Drivers.Encoders.CanCoder;
 import frc.robot.Modules.RobotModuleBase;
 import frc.robot.Modules.SwerveBasedChassis;
 import frc.robot.Modules.SwerveWheel;
@@ -27,8 +32,17 @@ public class Robot extends LoggedRobot {
         /** whether the init process has completed */
         boolean initializationCompleted = false;
 
+        CanCoder testEncoder = new CanCoder(8);
+        CANSparkMax testMotor = new CANSparkMax(7, CANSparkMaxLowLevel.MotorType.kBrushless);
+        XboxController testController = new XboxController(1);
         @Override
         public void robotPeriodic() {
+                System.out.println(testEncoder.getEncoderVelocity());
+                if (testController.getAButton())
+                        testMotor.set(0.1);
+                else
+                        testMotor.set(0);
+
                 if (!isEnabled()) {
                         // System.out.println("<-- robot disabled -->");
                         this.initializationCompleted = false;
@@ -55,14 +69,14 @@ class Test {
         private PilotChassis testChassis;
 
         public void testPeriodic() {
-                testChassis.periodic();
-                chassisModule.periodic();
+                 testChassis.periodic();
+                 chassisModule.periodic();
 
 
-                frontLeftWheel.periodic();
-                // backLeftWheel.periodic();
-                // frontRightWheel.periodic();
-                // backRightWheel.periodic();
+                 frontLeftWheel.periodic();
+                 backLeftWheel.periodic();
+                 frontRightWheel.periodic();
+                 backRightWheel.periodic();
         }
 
         public void testReset() {
@@ -96,6 +110,8 @@ class Test {
                 frontLeftWheelParams.put("wheelID", 1);
                 frontLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, 1 }));
                 frontLeftWheelParams.put("robotConfig", robotConfig);
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("frontLeftWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("frontLeftWheelSteerEncoderReversed"));
                 frontLeftWheel.init(null, frontLeftWheelParams);
 
                 backLeftWheel = new SwerveWheel();
@@ -111,6 +127,8 @@ class Test {
                 backLeftWheelParams.put("wheelID", 2);
                 backLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, -1 }));
                 backLeftWheelParams.put("robotConfig", robotConfig);
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("backLeftWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("backLeftWheelSteerEncoderReversed"));
                 backLeftWheel.init(null, backLeftWheelParams);
 
                 frontRightWheel = new SwerveWheel();
@@ -126,6 +144,8 @@ class Test {
                 frontRightWheelParams.put("wheelID", 3);
                 frontRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, 1 }));
                 frontRightWheelParams.put("robotConfig", robotConfig);
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("frontRightWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("frontRightWheelSteerEncoderReversed"));
                 frontRightWheel.init(null, frontRightWheelParams);
 
                 backRightWheel = new SwerveWheel();
@@ -141,6 +161,8 @@ class Test {
                 backRightWheelParams.put("wheelID", 2);
                 backRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, -1 }));
                 backRightWheelParams.put("robotConfig", robotConfig);
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("backRightWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("backRightWheelSteerEncoderReversed"));
                 backRightWheel.init(null, backRightWheelParams);
 
                 this.chassisModule = new SwerveBasedChassis();

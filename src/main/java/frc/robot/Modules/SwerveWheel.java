@@ -80,6 +80,8 @@ public class SwerveWheel extends RobotModuleBase {
      *                          double "coderBias": the difference, in radian,
      *                          between the zero position of the motor's encoder
      *                          and the actual zero position of the wheel ||
+     *                          boolean steerMotorReversed ||
+     *                          boolean steerEncoderReversed ||
      *                          RobotConfigReader "robotConfig" the configuration
      *                          instance ||
      *                          }
@@ -106,6 +108,12 @@ public class SwerveWheel extends RobotModuleBase {
         if (!params.containsKey("coderBias"))
             throw new NullPointerException(
                     "missing parameter \"" + "coderBias" + "\"" + "during initialization");
+        if (!params.containsKey("steerMotorReversed"))
+            throw new NullPointerException(
+                    "missing parameter \"" + "steerMotorReversed" + "\"" + "during initialization");
+        if (!params.containsKey("steerEncoderReversed"))
+            throw new NullPointerException(
+                    "missing parameter \"" + "steerEncoderReversed" + "\"" + "during initialization");
         if (!params.containsKey("robotConfig"))
             throw new NullPointerException(
                     "missing parameter \"" + "robotConfig" + "\"" + "during initialization");
@@ -128,11 +136,13 @@ public class SwerveWheel extends RobotModuleBase {
         this.lowestUsageSpeed = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
 
         /* initialize the motors */
+        boolean steerMotorReversed = (int) params.get("steerMotorReversed") != 0;
+        boolean steerEncoderReversed = (int) params.get("steerEncoderReversed") != 0;
         this.drivingMotor = new CanSparkMaxMotor(drivingMotorPort); // here are the motor settings
         drivingMotor.gainOwnerShip(this);
-        this.steerMotor = new CanSparkMaxMotor(steerMotorPort, true);
+        this.steerMotor = new CanSparkMaxMotor(steerMotorPort, steerMotorReversed);
         steerMotor.gainOwnerShip(this);
-        this.steerEncoder = new CanCoder(CANCoderPort);
+        this.steerEncoder = new CanCoder(CANCoderPort, steerEncoderReversed);
 
         /* calibrate the steer encoder */
         this.steerEncoder.setZeroPosition(motorEncoderBias);
