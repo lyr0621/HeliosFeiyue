@@ -65,11 +65,11 @@ public class RobotConfigReader {
         for (int i = 0; i < nodes.getLength(); i++) {
             String constantName = nodes.item(i).getNodeName();
             String currentType = readConstant(domainName, constantName, domainConfigs);
-            if (currentType == "null") // if the current constant is not read
+            if (currentType.equals("null")) // if the current constant is not read
                 continue;
-            if (domainType == "null")
+            if (domainType.equals("null"))
                 domainType = currentType;
-            if (domainType != currentType)
+            if (! domainType.equals(currentType))
                 throw new IllegalArgumentException("configs inside one domain should have the same type");
         }
 
