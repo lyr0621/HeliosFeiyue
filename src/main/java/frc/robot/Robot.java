@@ -36,6 +36,7 @@ public class Robot extends LoggedRobot {
 
         CanCoder testEncoder = new CanCoder(8);
         CANSparkMax testMotor = new CANSparkMax(7, CANSparkMaxLowLevel.MotorType.kBrushless);
+        RobotConfigReader configReader;
         @Override
         public void robotPeriodic() {
                 if (!isEnabled()) {
@@ -52,6 +53,11 @@ public class Robot extends LoggedRobot {
 
         @Override
         public void robotInit() {
+                try {
+                        configReader = new RobotConfigReader();
+                } catch (Exception e) {
+                        throw new RuntimeException(e);
+                }
                 System.out.println("<-- robot initialization -->");
                 test.testStart();
                 this.initializationCompleted = true;

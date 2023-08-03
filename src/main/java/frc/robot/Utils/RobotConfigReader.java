@@ -96,6 +96,7 @@ public class RobotConfigReader {
         }
         /* gets the type */
         String type = node.getAttributes().getNamedItem("type").getNodeValue();
+        System.out.println("constant name:" + constantName + "has type:" + type);
         switch (type) {
             case "int" : {
                 if (domainConfigs == null)
@@ -113,7 +114,7 @@ public class RobotConfigReader {
                 throw new IllegalArgumentException("unknown type of robot config");
             }
         }
-        System.out.println("reading " + domainName + " constant: " + constantName + ", value: " + node.getNodeValue());
+        System.out.println("reading " + domainName + " constant: " + constantName + ", value: " + node.getTextContent());
         return type;
     }
 
