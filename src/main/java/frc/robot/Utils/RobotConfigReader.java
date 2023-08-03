@@ -1,10 +1,7 @@
 package frc.robot.Utils;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,84 +20,132 @@ public class RobotConfigReader {
     private static final String HOME_DIR = "/home/lvuser/";
 
     /**
-     * the hashmap that stores all the configs for hardware, like motor
-     * ports
+     * the hashmap that stores all the configs
      */
-    public final Map<String, Integer> hardwareConfigs = new HashMap<String, Integer>();
+    private Map<String, Map> robotConfigs= new HashMap(1);
 
-    /**
-     * the hashmap that stores all the configs for chassis, like motor speed and PID
-     * coefficients
-     */
-    public final Map<String, Double> chassisConfigs = new HashMap<String, Double>();
+    /** the configurations to tune, in the form of configDomain/configName */
+    private final List<String> configsToTune = new ArrayList(1);
 
-    /**
-     * the hashmap that stores all the config for controlling, like the binding of
-     * buttons axis
-     */
-    public final Map<String, Integer> controlConfigs = new HashMap<String, Integer>();
-
-    /** the configurations to tune */
-    private final List<String> configsToTune = new ArrayList<>(1);
+    private File xmlFile;
+    private Document doc;
+    XPathFactory xPathFactory;
+    XPath xPath;
 
     public RobotConfigReader() throws Exception {
         /* read xml file from filesystem */
-        File xmlFile = new File(HOME_DIR + "deploy/robotConfig.xml");
+        xmlFile = new File(HOME_DIR + "deploy/robotConfig.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(xmlFile);
+        doc = dBuilder.parse(xmlFile);
         doc.getDocumentElement().normalize();
 
         /* add xpath finder */
-        XPathFactory xPathFactory = XPathFactory.newInstance();
-        XPath xPath = xPathFactory.newXPath();
+        xPathFactory = XPathFactory.newInstance();
+        xPath = xPathFactory.newXPath();
 
-        /* read the configurations for hardware */
-        XPathExpression expr = xPath.compile("/robotConfig/hardware/*");
-        NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            String constantName = nodes.item(i).getNodeName();
-            expr = xPath.compile("/robotConfig/hardware/" + constantName + "/text()");
-            Node node = (Node) expr.evaluate(doc, XPathConstants.NODE);
-            if (node == null) {
-                System.out.println("warning, constant: " + constantName + " not found in xml file, skipping");
-                continue;
-            }
-            System.out.println("reading hardware constant: " + constantName + " with value: " + node.getNodeValue());
-            hardwareConfigs.put(constantName, Integer.parseInt(node.getNodeValue()));
-        }
+        /* Get all configuration elements (e.g., hardwareConfig, chassisConfig) */
+        XPathExpression expr = xPath.compile("/robotConfig/*");
+        NodeList configDomains = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-        /* read the configurations for chassis */
-        expr = xPath.compile("/robotConfig/chassis/*");
-        nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            String constantName = nodes.item(i).getNodeName();
-            expr = xPath.compile("/robotConfig/chassis/" + constantName + "/text()");
-            Node node = (Node) expr.evaluate(doc, XPathConstants.NODE);
-            if (node == null) {
-                System.out.println("warning, chassis constant: " + constantName + " not found in xml file, skipping");
-                continue;
-            }
-            System.out.println("reading chassis constant: " + constantName + " with value: " + node.getNodeValue());
-            chassisConfigs.put(constantName, Double.parseDouble(node.getNodeValue()));
-        }
-
-        /* read the configurations for controlling */
-        expr = xPath.compile("/robotConfig/control/*");
-        nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            String constantName = nodes.item(i).getNodeName();
-            expr = xPath.compile("/robotConfig/control/" + constantName + "/text()");
-            Node node = (Node) expr.evaluate(doc, XPathConstants.NODE);
-            if (node == null) {
-                System.out
-                        .println("warning, controlling constant: " + constantName + " not found in xml file, skipping");
-                continue;
-            }
-            System.out.println("reading chassis constant: " + constantName + " with value: " + node.getNodeValue());
-            controlConfigs.put(constantName, Integer.parseInt(node.getNodeValue()));
+        for (int i = 0; i < configDomains.getLength(); i++) {
+            Node configNode = configDomains.item(i);
+            String domainName = configNode.getNodeName();
+            readDomain(domainName);
         }
     }
 
-    // private void startTuningChassisConfig(String config)
+    private void readDomain(String domainName) throws XPathExpressionException {
+        /* read the configurations for hardware */
+        XPathExpression expr = xPath.compile("/robotConfig/" + domainName + "/*");
+        NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+        Map domainConfigs = null;
+        String domainType = "null";
+        for (int i = 0; i < nodes.getLength(); i++) {
+            String constantName = nodes.item(i).getNodeName();
+            String currentType = readConstant(domainName, constantName, domainConfigs);
+            if (currentType == "null") // if the current constant is not read
+                continue;
+            if (domainType == "null")
+                domainType = currentType;
+            if (domainType != currentType)
+                throw new IllegalArgumentException("configs inside one domain should have the same type");
+        }
+
+        robotConfigs.put(domainName, domainConfigs);
+    }
+
+    /**
+     * read a specific constant from the xml file
+     * @param domainName the name of the domain that the constant belongs to
+     * @param constantName the name of that constant
+     * @param domainConfigs the current map of the configurations inside the domain that this constant belongs to
+     * @return the type of the constant read
+     *  */
+    private String readConstant(String domainName, String constantName, Map domainConfigs) throws XPathExpressionException {
+        /* only reads double and int, for boolean, just do int and then do param != 0 to judge true or false */
+
+        // XPathExpression expr = xPath.compile("/robotConfig/hardware/" + constantName + "/text()");
+        XPathExpression expr = xPath.compile("/robotConfig/" + domainName + "/" + constantName);
+        Node node = (Node) expr.evaluate(doc, XPathConstants.NODE);
+
+        if (node == null) {
+            System.out.println("warning, constant: " + constantName + " not found in xml file, skipping");
+            return "null";
+        }
+        /* gets the type */
+        String type = node.getAttributes().getNamedItem("type").getNodeValue();
+        switch (type) {
+            case "int" : {
+                if (domainConfigs == null)
+                    domainConfigs = new HashMap<String, Integer>();
+                domainConfigs.put(constantName, Integer.parseInt(node.getTextContent()));
+                break;
+            }
+            case "double" : {
+                if (domainConfigs == null)
+                    domainConfigs = new HashMap<String, Double>();
+                domainConfigs.put(constantName, Double.parseDouble(node.getTextContent()));
+                break;
+            }
+            default: {
+                throw new IllegalArgumentException("unknown type of robot config");
+            }
+        }
+        System.out.println("reading " + domainName + " constant: " + constantName + ", value: " + node.getNodeValue());
+        return type;
+    }
+
+    /**
+     * gets the configuration in a given path
+     * @param configPath in domainName/constantName
+     * @return the value of the constant
+     */
+    public Object getConfig(String configPath) {
+        String domainName = configPath.split("/")[0];
+        String constantName = configPath.split("/")[1];
+        return getConfig(domainName, constantName);
+    }
+
+    /**
+     * gets the configuration in a given path
+     * @param domainName the name of the domain that the constant belongs to
+     * @param constantName the name of the constant
+     * @return the value of the constant
+     */
+    public Object getConfig(String domainName, String constantName) {
+        return robotConfigs.get(domainName).get(constantName);
+    }
+
+    private void startTuningConfig(String configPath) {
+        String domainName = configPath.split("/")[0];
+        String constantName = configPath.split("/")[1];
+        startTuningConfig(domainName, constantName);
+    }
+
+    /** start to tune a configuration on the dashboard (shuffleboard suggested) */
+    private void startTuningConfig(String domainName, String constantName) {
+
+    }
 }
