@@ -71,7 +71,7 @@ public class PilotChassis extends RobotServiceBase {
         this.zAxisSensitivity = ((double) robotConfig.getConfig("control/pilotControllerZAxisSensitivity")) / 100; // TODO make it dynamic and updates in updateConfigs()
 
         /* declare the pilot's controller joy stick */
-        this.pilotControllerStick = new Joystick((Integer) robotConfig.getConfig("control/pilotControllerPort"));
+        this.pilotControllerStick = new Joystick((int) robotConfig.getConfig("control/pilotControllerPort"));
 
         // System.out.println("<--pilot chassis initialize complete-->");
         reset();

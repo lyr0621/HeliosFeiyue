@@ -23,9 +23,7 @@ public class RobotConfigReader {
     private static final String HOME_DIR = "/home/lvuser/";
 
     /** the hashmap that stores all the configs */
-    private Map<String, Map> robotConfigs= new HashMap(1);
-    /** the hashmap that stores the type of constant in each domain <domain, type> */
-    private Map<String, String> constantTypes = new HashMap();
+    private Map<String, Map<String, Double>> robotConfigs= new HashMap(1);
 
     /** the configurations to tune, in the form of configDomain/configName */
     private final List<String> configsToTune = new ArrayList(1);
@@ -65,7 +63,7 @@ public class RobotConfigReader {
         XPathExpression expr = xPath.compile("/robotConfig/" + domainName + "/*");
         NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-        Map<String, Object> domainConfigs = new HashMap();
+        Map<String, Double> domainConfigs = new HashMap();
         for (int i = 0; i < nodes.getLength(); i++) {
             String constantName = nodes.item(i).getNodeName();
             readConstant(domainName, constantName, domainConfigs);
@@ -80,7 +78,7 @@ public class RobotConfigReader {
      * @param constantName the name of that constant
      * @param domainConfigs the current map of the configurations inside the domain that this constant belongs to
      *  */
-    private void readConstant(String domainName, String constantName, Map domainConfigs) throws XPathExpressionException {
+    private void readConstant(String domainName, String constantName, Map<String, Double> domainConfigs) throws XPathExpressionException {
         /* only reads double and int, for boolean, just do int and then do param != 0 to judge true or false */
 
         // XPathExpression expr = xPath.compile("/robotConfig/hardware/" + constantName + "/text()");
@@ -91,24 +89,9 @@ public class RobotConfigReader {
             System.out.println("warning, constant: " + constantName + " not found in xml file, skipping");
             return;
         }
-        /* gets the type */
-        String type = node.getAttributes().getNamedItem("type").getNodeValue();
-        System.out.println("constant name:" + constantName + "has type:" + type);
-        switch (type) {
-            case "int" : {
-                domainConfigs.put(constantName, Integer.parseInt(node.getTextContent()));
-                break;
-            }
-            case "double" : {
-                domainConfigs.put(constantName, Double.parseDouble(node.getTextContent()));
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("unknown type of robot config");
-            }
-        }
+
+        domainConfigs.put(constantName, Double.parseDouble(node.getTextContent()));
         System.out.println("reading " + domainName + " constant: " + constantName + ", value: " + node.getTextContent());
-        return;
     }
 
     /**
@@ -116,7 +99,7 @@ public class RobotConfigReader {
      * @param configPath in domainName/constantName
      * @return the value of the constant
      */
-    public Object getConfig(String configPath) {
+    public double getConfig(String configPath) {
         String domainName = configPath.split("/")[0];
         String constantName = configPath.split("/")[1];
         return getConfig(domainName, constantName);
@@ -128,7 +111,7 @@ public class RobotConfigReader {
      * @param constantName the name of the constant
      * @return the value of the constant
      */
-    public Object getConfig(String domainName, String constantName) {
+    public double getConfig(String domainName, String constantName) {
         return robotConfigs.get(domainName).get(constantName);
     }
 
@@ -140,6 +123,7 @@ public class RobotConfigReader {
     public void startTuningConfig(String configPath) {
         if (!configsToTune.contains(configPath))
             configsToTune.add(configPath);
+        SmartDashboard.putNumber(configPath, getConfig(configPath));
     }
 
 
@@ -147,8 +131,8 @@ public class RobotConfigReader {
         for (String configToTune: configsToTune) {
             String domainName = configToTune.split("/")[0];
             String constantName = configToTune.split("/")[1];
-            Map domainConfig = robotConfigs.get(domainName);
-            domainConfig.put(constantName, SmartDashboard.getNumber(configToTune, (Double) domainConfig.get(constantName)));
+            Map<String, Double> domainConfig = robotConfigs.get(domainName);
+            domainConfig.put(constantName, SmartDashboard.getNumber(configToTune, domainConfig.get(constantName)));
             robotConfigs.put(domainName, domainConfig);
 
             System.out.println("updated config:" + configToTune + "to: " + SmartDashboard.getNumber(configToTune, 0));
