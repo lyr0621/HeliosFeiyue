@@ -48,17 +48,30 @@ public class EnhancedPIDController {
         dt = new Timer();
     }
 
-    /** set all variables to initial state */
-    public void reset(double initialValue) {
+    /**
+     * set all variables to initial state
+     * @param initialValue the initial position when resetting
+     * @param keepIntegralValue whether to keep the integration variable
+     * */
+    public void reset(double initialValue, boolean keepIntegralValue) {
         dt.start();
         dt.reset();
         task.resetTaskTime();
         previousPosition = initialValue;
         previousVelocity = 0;
         previousMotorPower = 0;
-        integralValue = 0;
+        if (!keepIntegralValue)
+            integralValue = 0;
         pathSchedule = null;
         speedChangingProcess = null;
+    }
+
+    /**
+     * set all variables to initial state, including integration
+     * @param initialValue the initial position when resetting
+     */
+    public void reset(double initialValue) {
+        reset(initialValue, false);
     }
 
     public void startNewTask(Task newTask, double initialPosition) {
@@ -68,6 +81,16 @@ public class EnhancedPIDController {
 
     public void startNewTask(Task newTask) {
         startNewTask(newTask, previousPosition);
+    }
+
+    /** start a new task, but keep the current integration so the machine do not need to find integration again */
+    public void startNewTaskKeepIntegration(Task newTask, double initialPosition) {
+        this.task = newTask;
+        reset(initialPosition, true);
+    }
+
+    public void startNewTaskKeepIntegration(Task newTask) {
+        startNewTaskKeepIntegration(newTask, previousPosition);
     }
 
     public double getMotorPower(double currentPosition) {

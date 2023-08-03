@@ -39,7 +39,6 @@ public class SwerveBasedChassis extends RobotModuleBase {
      *                          wheel module
      *                          }
      * @param params this module does not acquire any parameters, so null would be fine
-     *                          }
      */
     @Override
     public void init(

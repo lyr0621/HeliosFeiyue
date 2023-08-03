@@ -42,6 +42,9 @@ public abstract class RobotModuleBase extends RobotModuleOperatorMarker {
     /** called during every loop */
     public abstract void periodic();
 
+    /** update robot configs from robotConfigReader, used when debugging the robot override or nothing will be done */
+    public void updateConfigs() {}
+
     /** called to reset module to initial state, you can also call it by the end of init() */
     public abstract void reset();
 
