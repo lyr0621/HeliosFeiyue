@@ -8,8 +8,7 @@ import frc.robot.Drivers.Motors.CanSparkMaxMotor;
 import frc.robot.Utils.*;
 import frc.robot.Drivers.Encoders.CanCoder;
 import frc.robot.Drivers.Motors.MotorDriver;
-import frc.robot.Drivers.Motors.TalonFXMotor;
-import frc.robot.Services.RobotService;
+import frc.robot.Services.RobotServiceBase;
 
 public class SwerveWheel extends RobotModuleBase {
     // TODO add a disable function
@@ -34,6 +33,13 @@ public class SwerveWheel extends RobotModuleBase {
      * called "unused"
      */
     private double lowestUsageSpeed;
+    private double steerWheelErrorTolerance;
+    private double steerWheelErrorStartDecelerate;
+    private double steerWheelCorrectionPower;
+    private double steerWheelMinimumPower;
+    private double steerWheelVelocityDebugTime;
+
+    /* <--variables--> */
 
     /** the desired position to drive */
     private double targetedHeading = 0;
@@ -131,9 +137,7 @@ public class SwerveWheel extends RobotModuleBase {
         this.robotConfig = (RobotConfigReader) params.get("robotConfig");
 
         /* read the configuration of the robot */
-        this.maxUnusedTime = robotConfig.chassisConfigs.get("maxUnusedTime");
-        this.defaultPosition = Math.toRadians(robotConfig.chassisConfigs.get("defaultPosition"));
-        this.lowestUsageSpeed = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
+        updateConfigs();
 
         /* initialize the motors */
         boolean steerMotorReversed = (int) params.get("steerMotorReversed") != 0;
@@ -216,6 +220,18 @@ public class SwerveWheel extends RobotModuleBase {
     }
 
     @Override
+    public void updateConfigs() {
+        this.maxUnusedTime = robotConfig.chassisConfigs.get("maxUnusedTime");
+        this.defaultPosition = Math.toRadians(robotConfig.chassisConfigs.get("defaultPosition"));
+        this.lowestUsageSpeed = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
+        this.steerWheelErrorTolerance = Math.toRadians(robotConfig.chassisConfigs.get("steerWheelErrorTolerance"));
+        this.steerWheelErrorStartDecelerate = Math.toRadians(robotConfig.chassisConfigs.get("steerWheelErrorStartDecelerate"));
+        this.steerWheelCorrectionPower = robotConfig.chassisConfigs.get("steerWheelCorrectionPower");
+        this.steerWheelMinimumPower = robotConfig.chassisConfigs.get("steerWheelMinimumPower");
+        this.steerWheelVelocityDebugTime = robotConfig.chassisConfigs.get("steerWheelVelocityDebugTime");
+    }
+
+    @Override
     public void reset() {
         lastOperationTimer.start();
     }
@@ -272,14 +288,14 @@ public class SwerveWheel extends RobotModuleBase {
     }
 
     /** disable the steer module */
-    public void disable(RobotService operatorRobotService) {
+    public void disable(RobotServiceBase operatorRobotService) {
         if (!isOwner(operatorRobotService))
             return;
         this.disabled = true;
     }
 
     /** enable the steer module */
-    public void enable(RobotService currentRobotService) {
+    public void enable(RobotServiceBase currentRobotService) {
         if (!isOwner(currentRobotService))
             return;
         this.disabled = false;
@@ -320,14 +336,6 @@ public class SwerveWheel extends RobotModuleBase {
      *         the desired direction
      */
     private double getSteerMotorCorrectionSpeed(double rotationalError, double steerVelocity) {
-        final double steerWheelErrorTolerance = Math
-                .toRadians(robotConfig.chassisConfigs.get("steerWheelErrorTolerance"));
-        final double steerWheelErrorStartDecelerate = Math
-                .toRadians(robotConfig.chassisConfigs.get("steerWheelErrorStartDecelerate"));
-        final double steerWheelCorrectionPower = robotConfig.chassisConfigs.get("steerWheelCorrectionPower");
-        final double steerWheelMinimumPower = robotConfig.chassisConfigs.get("steerWheelMinimumPower");
-        final double steerWheelVelocityDebugTime = robotConfig.chassisConfigs.get("steerWheelVelocityDebugTime");
-
         /*
          * predict, according to the current steer velocity, the future rotational error
          */

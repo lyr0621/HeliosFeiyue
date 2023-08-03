@@ -40,6 +40,9 @@ public class RobotConfigReader {
      */
     public final Map<String, Integer> controlConfigs = new HashMap<String, Integer>();
 
+    /** the configurations to tune */
+    private final List<String> configsToTune = new ArrayList<>(1);
+
     public RobotConfigReader() throws Exception {
         /* read xml file from filesystem */
         File xmlFile = new File(HOME_DIR + "deploy/robotConfig.xml");
@@ -98,4 +101,6 @@ public class RobotConfigReader {
             controlConfigs.put(constantName, Integer.parseInt(node.getNodeValue()));
         }
     }
+
+    // private void startTuningChassisConfig(String config)
 }

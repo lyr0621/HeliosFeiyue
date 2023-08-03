@@ -8,7 +8,7 @@ import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Modules.RobotModuleBase;
 import frc.robot.Utils.Vector2D;
 
-public class PilotChassis extends RobotService {
+public class PilotChassis extends RobotServiceBase {
     /** the module of the robot's chassis */
     private SwerveBasedChassis chassis;
     /** the pilot's controller stick */
@@ -68,7 +68,7 @@ public class PilotChassis extends RobotService {
         this.pilotStickThreshold = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
         this.xAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerXAxisSensitivity")) / 100;
         this.yAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerYAxisSensitivity")) / 100;
-        this.zAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerZAxisSensitivity")) / 100;
+        this.zAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerZAxisSensitivity")) / 100; // TODO make it dynamic and updates in updateConfigs()
 
         /* declare the pilot's controller joy stick */
         this.pilotControllerStick = new Joystick(robotConfig.controlConfigs.get("pilotControllerPort"));

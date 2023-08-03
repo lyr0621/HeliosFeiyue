@@ -12,14 +12,14 @@ import java.util.HashMap;
  * @author Sam
  * @version 0.1
  */
-public abstract class RobotService extends RobotModuleOperatorMarker {
+public abstract class RobotServiceBase extends RobotModuleOperatorMarker {
     /** the name of the service */
     public String serviceName;
 
     /**
      * initialization of robot service, just do super("your module name")
      */
-    protected RobotService(String serviceName) {
+    protected RobotServiceBase(String serviceName) {
         this.serviceName = serviceName;
     }
 
@@ -31,6 +31,9 @@ public abstract class RobotService extends RobotModuleOperatorMarker {
 
     /** called during every loop */
     abstract public void periodic();
+
+    /** update robot configs from robotConfigReader, used when debugging the robot override or nothing will be done */
+    public void updateConfigs() {}
 
     /** called when the program ends */
     abstract public void onDestroy();

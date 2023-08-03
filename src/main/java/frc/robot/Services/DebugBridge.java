@@ -5,7 +5,7 @@ import java.util.HashMap;
 import frc.robot.Modules.RobotModuleBase;
 
 // TODO write this method as a bridge between robot modules and the console
-public class DebugBridge extends RobotService {
+public class DebugBridge extends RobotServiceBase {
 
     protected DebugBridge(String serviceName) {
         super(serviceName);
