@@ -48,7 +48,8 @@ public class Robot extends LoggedRobot {
                         test.testRestart();
 
                 // System.out.println("<-- robot main loop -->");
-                test.testPeriodic();
+                // test.testPeriodic();
+                configReader.updateTuningConfigsFromDashboard();
         }
 
         @Override
@@ -58,9 +59,11 @@ public class Robot extends LoggedRobot {
                 } catch (Exception e) {
                         throw new RuntimeException(e);
                 }
-                System.out.println("<-- robot initialization -->");
-                test.testStart();
+                // test.testStart();
                 this.initializationCompleted = true;
+
+                // testing
+                configReader.startTuningConfig("test/test1");
         }
 }
 

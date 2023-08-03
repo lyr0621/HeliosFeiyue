@@ -51,4 +51,7 @@
         <!-- the minimum amount of stick input to respond to, in percentage -->
         <pilotStickThreshold type="int">10</pilotStickThreshold>
     </control>
+    <test>
+        <test1 type="int">12</test1>
+    </test>
 </robotConfig>
