@@ -291,6 +291,16 @@ public class SwerveWheel extends RobotModuleBase {
         throw new UnsupportedOperationException("Unimplemented method 'onDestroy'");
     }
 
+    /** gets the position of the wheel on the robot */
+    public Vector2D getWheelPositionVector() {
+        return wheelPositionVector;
+    }
+
+    /** gets the direction vector of rotation of this wheel, which 90-deg counter-clockwise to the wheel */
+    public Vector2D getRotationDirectionVector() {
+        return rotationDirectionVector;
+    }
+
     public double getWheelHeading() {
         return CanCoder.simplifyAngle(steerEncoder.getEncoderPosition() + Math.PI / 2);
     }

@@ -45,9 +45,6 @@ public abstract class PositionReader extends RobotModuleBase {
         setRobotRotation(rotation);
     }
 
-    /** updates, according to the encoder's value, the robot's status */
-    public abstract void update();
-
     /** whether the last update is reliable(for some vision-calculator there might situations when the target is lost) */
     public abstract boolean isResultReliable();
 }

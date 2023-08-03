@@ -175,20 +175,27 @@ public class EnhancedPIDController {
     private double getMotorPowerGoToPositionClassic(double currentPosition, double velocity, Task task) {
         double predictedFuturePosition = currentPosition + velocity * pidProfile.getFeedForwardTime();
         double error = getActualDifference(currentPosition, task.value);
-        this.integralValue += (getActualDifference(currentPosition, task.value)) * dt.get();
 
-        System.out.println("error:" + Math.toDegrees(error) + "; error tolerance:" + Math.toDegrees(pidProfile.getErrorTolerance())); // TODO test this part
-        if (Math.abs(error) < pidProfile.getErrorTolerance())
-            return 0;
+        /* proportion */
+        double correctionPower = error * pidProfile.getProportion();
 
-        double correctionPower = error * pidProfile.getProportion() + integralValue * pidProfile.getErrorIntegralCoefficient();
-
+        /* floor value */
         double correctionPowerMagnitude = Math.abs(correctionPower);
         if (correctionPowerMagnitude < pidProfile.getMinPowerToMove())
             correctionPowerMagnitude = pidProfile.getMinPowerToMove();
-        if (correctionPowerMagnitude > pidProfile.getMaxPowerAllowed())
-            correctionPowerMagnitude = pidProfile.getMaxPowerAllowed();
         correctionPower = Math.copySign(correctionPowerMagnitude, correctionPower);
+
+        /* error tolerance */
+        if (Math.abs(error) < pidProfile.getErrorTolerance())
+            correctionPower = 0;
+
+        /* integral */
+        correctionPower += integralValue * pidProfile.getErrorIntegralCoefficient();
+        this.integralValue += (getActualDifference(currentPosition, task.value)) * dt.get();
+
+        correctionPower = MathUtil.clamp(correctionPower, -pidProfile.getMaxPowerAllowed(), pidProfile.getMaxPowerAllowed());
+
+        System.out.println("error:" + Math.toDegrees(error) + ";  power:" + correctionPower); // TODO test this part
 
         return correctionPower;
     }
@@ -203,7 +210,7 @@ public class EnhancedPIDController {
         if (difference > loopLength / 2)
             return loopLength - difference;
         if (difference < -loopLength / 2)
-            return loopLength - difference;
+            return loopLength + difference;
         return difference;
     }
 

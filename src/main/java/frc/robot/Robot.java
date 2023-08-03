@@ -183,22 +183,22 @@ class RobotContainer {
 
 
 class PIDTest {
-        private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,true);
+        private final CanSparkMaxMotor testMotor = new CanSparkMaxMotor(4,false);
         private final CanCoder testEncoder = new CanCoder(5, false);
         private final XboxController controller = new XboxController(1);
         private final EnhancedPIDController pidController = new EnhancedPIDController(new EnhancedPIDController.StaticPIDProfile(
                 Math.PI * 2,
-                0.3,
-                0.07,
+                0.4,
+                0.03,
                 Math.toRadians(90),
-                Math.toRadians(1),
-                0.2,
+                Math.toRadians(1.5),
+                0.3,
                 0,
                 0
         ));
         public void testStart() {
                 pidController.startNewTask(
-                        new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, 0),
+                        new EnhancedPIDController.Task(EnhancedPIDController.Task.GO_TO_POSITION, Math.toRadians(90)),
                         testEncoder.getEncoderPosition()
                 );
         }
@@ -216,12 +216,15 @@ class PIDTest {
                 SmartDashboard.putNumber("correction power", correctionPower);
 
                 testMotor.gainOwnerShip(null);
-                if (!controller.getAButton()) {
+                if (!controller.getAButton() && !controller.getBButton()) {
                         correctionPower = 0;
                         testMotor.setZeroPowerHoldStill(false);
                 }
-                else {
+                else if (controller.getAButton()) {
                         testMotor.setZeroPowerHoldStill(true);
+                } else {
+                        testMotor.setZeroPowerHoldStill(true);
+                        correctionPower = 0.3;
                 }
                 testMotor.setPower(correctionPower, null);
         }

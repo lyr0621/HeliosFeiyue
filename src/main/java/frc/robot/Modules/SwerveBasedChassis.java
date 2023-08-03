@@ -4,6 +4,12 @@ import frc.robot.Utils.Vector2D;
 
 import java.util.HashMap;
 
+/**
+ * the module that controls the chassis with its four swerves
+ * TODO add go-to-position mode for auto
+ * TODO use profiled-PID speed control and
+ * TODO add path-planer
+ */
 public class SwerveBasedChassis extends RobotModuleBase {
     /** the four wheels of the robot */
     private SwerveWheel[] swerveWheels = new SwerveWheel[4];
