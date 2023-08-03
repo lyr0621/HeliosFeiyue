@@ -221,14 +221,14 @@ public class SwerveWheel extends RobotModuleBase {
 
     @Override
     public void updateConfigs() {
-        this.maxUnusedTime = robotConfig.chassisConfigs.get("maxUnusedTime");
-        this.defaultPosition = Math.toRadians(robotConfig.chassisConfigs.get("defaultPosition"));
-        this.lowestUsageSpeed = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
-        this.steerWheelErrorTolerance = Math.toRadians(robotConfig.chassisConfigs.get("steerWheelErrorTolerance"));
-        this.steerWheelErrorStartDecelerate = Math.toRadians(robotConfig.chassisConfigs.get("steerWheelErrorStartDecelerate"));
-        this.steerWheelCorrectionPower = robotConfig.chassisConfigs.get("steerWheelCorrectionPower");
-        this.steerWheelMinimumPower = robotConfig.chassisConfigs.get("steerWheelMinimumPower");
-        this.steerWheelVelocityDebugTime = robotConfig.chassisConfigs.get("steerWheelVelocityDebugTime");
+        this.maxUnusedTime = (double) robotConfig.getConfig("chassis/maxUnusedTime");
+        this.defaultPosition = Math.toRadians((Double) robotConfig.getConfig("chassis/defaultPosition"));
+        this.lowestUsageSpeed = ((double) robotConfig.getConfig("chassis/pilotStickThreshold")) / 100;
+        this.steerWheelErrorTolerance = Math.toRadians((Double) robotConfig.getConfig("chassis/steerWheelErrorTolerance"));
+        this.steerWheelErrorStartDecelerate = Math.toRadians((Double) robotConfig.getConfig("chassis/steerWheelErrorStartDecelerate"));
+        this.steerWheelCorrectionPower = (double) robotConfig.getConfig("chassis/steerWheelCorrectionPower");
+        this.steerWheelMinimumPower = (double) robotConfig.getConfig("chassis/steerWheelMinimumPower");
+        this.steerWheelVelocityDebugTime = (double) robotConfig.getConfig("chassis/steerWheelVelocityDebugTime");
     }
 
     @Override

@@ -95,69 +95,69 @@ class RobotContainer {
                 frontLeftWheel = new SwerveWheel();
                 HashMap<String, Object> frontLeftWheelParams = new HashMap<String, Object>(1);
                 frontLeftWheelParams.put("drivingMotorPort",
-                        robotConfig.hardwareConfigs.get("frontLeftWheelDriveMotor"));
+                        robotConfig.getConfig("hardware/frontLeftWheelDriveMotor"));
                 frontLeftWheelParams.put("steerMotorPort",
-                        robotConfig.hardwareConfigs.get("frontLeftWheelSteerMotor"));
+                        robotConfig.getConfig("hardware/frontLeftWheelSteerMotor"));
                 frontLeftWheelParams.put("CANCoderPort",
-                        robotConfig.hardwareConfigs.get("frontLeftWheelEncoder"));
+                        robotConfig.getConfig("hardware/frontLeftWheelEncoder"));
                 frontLeftWheelParams.put("coderBias",
-                        robotConfig.chassisConfigs.get("frontLeftWheelZeroPosition"));
+                        robotConfig.getConfig("hardware/frontLeftWheelZeroPosition"));
                 frontLeftWheelParams.put("wheelID", 1);
                 frontLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, 1 }));
                 frontLeftWheelParams.put("robotConfig", robotConfig);
-                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("frontLeftWheelSteerMotorReversed"));
-                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("frontLeftWheelSteerEncoderReversed"));
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.getConfig("chassis/frontLeftWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.getConfig("chassis/frontLeftWheelSteerEncoderReversed"));
                 frontLeftWheel.init(null, frontLeftWheelParams);
 
                 backLeftWheel = new SwerveWheel();
                 HashMap<String, Object> backLeftWheelParams = new HashMap<String, Object>(1);
                 backLeftWheelParams.put("drivingMotorPort",
-                        robotConfig.hardwareConfigs.get("backLeftWheelDriveMotor"));
+                        robotConfig.getConfig("hardware/backLeftWheelDriveMotor"));
                 backLeftWheelParams.put("steerMotorPort",
-                        robotConfig.hardwareConfigs.get("backLeftWheelSteerMotor"));
+                        robotConfig.getConfig("hardware/backLeftWheelSteerMotor"));
                 backLeftWheelParams.put("CANCoderPort",
-                        robotConfig.hardwareConfigs.get("backLeftWheelEncoder"));
+                        robotConfig.getConfig("hardware/backLeftWheelEncoder"));
                 backLeftWheelParams.put("coderBias",
-                        robotConfig.chassisConfigs.get("backLeftWheelZeroPosition"));
+                        robotConfig.getConfig("hardware/backLeftWheelZeroPosition"));
                 backLeftWheelParams.put("wheelID", 2);
                 backLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, -1 }));
                 backLeftWheelParams.put("robotConfig", robotConfig);
-                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("backLeftWheelSteerMotorReversed"));
-                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("backLeftWheelSteerEncoderReversed"));
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.getConfig("chassis/backLeftWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.getConfig("chassis/backLeftWheelSteerEncoderReversed"));
                 backLeftWheel.init(null, backLeftWheelParams);
 
                 frontRightWheel = new SwerveWheel();
                 HashMap<String, Object> frontRightWheelParams = new HashMap<String, Object>(1);
                 frontRightWheelParams.put("drivingMotorPort",
-                        robotConfig.hardwareConfigs.get("frontRightWheelDriveMotor"));
+                        robotConfig.getConfig("hardware/frontRightWheelDriveMotor"));
                 frontRightWheelParams.put("steerMotorPort",
-                        robotConfig.hardwareConfigs.get("frontRightWheelSteerMotor"));
+                        robotConfig.getConfig("hardware/frontRightWheelSteerMotor"));
                 frontRightWheelParams.put("CANCoderPort",
-                        robotConfig.hardwareConfigs.get("frontRightWheelEncoder"));
+                        robotConfig.getConfig("hardware/frontRightWheelEncoder"));
                 frontRightWheelParams.put("coderBias",
-                        robotConfig.chassisConfigs.get("frontRightWheelZeroPosition"));
+                        robotConfig.getConfig("hardware/frontRightWheelZeroPosition"));
                 frontRightWheelParams.put("wheelID", 3);
                 frontRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, 1 }));
                 frontRightWheelParams.put("robotConfig", robotConfig);
-                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("frontRightWheelSteerMotorReversed"));
-                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("frontRightWheelSteerEncoderReversed"));
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.getConfig("chassis/frontRightWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.getConfig("chassis/frontRightWheelSteerEncoderReversed"));
                 frontRightWheel.init(null, frontRightWheelParams);
 
                 backRightWheel = new SwerveWheel();
                 HashMap<String, Object> backRightWheelParams = new HashMap<String, Object>(1);
                 backRightWheelParams.put("drivingMotorPort",
-                        robotConfig.hardwareConfigs.get("backRightWheelDriveMotor"));
+                        robotConfig.getConfig("hardware/backRightWheelDriveMotor"));
                 backRightWheelParams.put("steerMotorPort",
-                        robotConfig.hardwareConfigs.get("backRightWheelSteerMotor"));
+                        robotConfig.getConfig("hardware/backRightWheelSteerMotor"));
                 backRightWheelParams.put("CANCoderPort",
-                        robotConfig.hardwareConfigs.get("backRightWheelEncoder"));
+                        robotConfig.getConfig("hardware/backRightWheelEncoder"));
                 backRightWheelParams.put("coderBias",
-                        robotConfig.chassisConfigs.get("backRightWheelZeroPosition"));
+                        robotConfig.getConfig("hardware/backRightWheelZeroPosition"));
                 backRightWheelParams.put("wheelID", 2);
                 backRightWheelParams.put("wheelPositionVector", new Vector2D(new double[] { 1, -1 }));
                 backRightWheelParams.put("robotConfig", robotConfig);
-                frontLeftWheelParams.put("steerMotorReversed", robotConfig.chassisConfigs.get("backRightWheelSteerMotorReversed"));
-                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.chassisConfigs.get("backRightWheelSteerEncoderReversed"));
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.getConfig("chassis/backRightWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.getConfig("chassis/backRightWheelSteerEncoderReversed"));
                 backRightWheel.init(null, backRightWheelParams);
 
                 this.chassisModule = new SwerveBasedChassis();

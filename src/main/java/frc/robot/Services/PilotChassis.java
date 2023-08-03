@@ -65,13 +65,13 @@ public class PilotChassis extends RobotServiceBase {
         RobotConfigReader robotConfig = (RobotConfigReader) params.get("robotConfig");
 
         /* read the configurations from the config reader */
-        this.pilotStickThreshold = ((double) robotConfig.controlConfigs.get("pilotStickThreshold")) / 100;
-        this.xAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerXAxisSensitivity")) / 100;
-        this.yAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerYAxisSensitivity")) / 100;
-        this.zAxisSensitivity = ((double) robotConfig.controlConfigs.get("pilotControllerZAxisSensitivity")) / 100; // TODO make it dynamic and updates in updateConfigs()
+        this.pilotStickThreshold = ((double) robotConfig.getConfig("control/pilotStickThreshold")) / 100;
+        this.xAxisSensitivity = ((double) robotConfig.getConfig("control/pilotControllerXAxisSensitivity")) / 100;
+        this.yAxisSensitivity = ((double) robotConfig.getConfig("control/pilotControllerYAxisSensitivity")) / 100;
+        this.zAxisSensitivity = ((double) robotConfig.getConfig("control/pilotControllerZAxisSensitivity")) / 100; // TODO make it dynamic and updates in updateConfigs()
 
         /* declare the pilot's controller joy stick */
-        this.pilotControllerStick = new Joystick(robotConfig.controlConfigs.get("pilotControllerPort"));
+        this.pilotControllerStick = new Joystick((Integer) robotConfig.getConfig("control/pilotControllerPort"));
 
         // System.out.println("<--pilot chassis initialize complete-->");
         reset();
