@@ -2,6 +2,12 @@ package frc.robot.Utils;
 
 import javax.management.StandardEmitterMBean;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.*;
 
 import java.io.File;
@@ -15,6 +21,7 @@ import javax.xml.parsers.DocumentBuilder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
@@ -134,8 +141,47 @@ public class RobotConfigReader {
             Map<String, Double> domainConfig = robotConfigs.get(domainName);
             domainConfig.put(constantName, SmartDashboard.getNumber(configToTune, domainConfig.get(constantName)));
             robotConfigs.put(domainName, domainConfig);
-
-            System.out.println("updated config:" + configToTune + "to: " + SmartDashboard.getNumber(configToTune, 0));
         }
+    }
+
+    public void writeConfigsToXML() throws ParserConfigurationException, TransformerException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+        // Create a new XML document
+        Document doc = docBuilder.newDocument();
+        Element rootElement = doc.createElement("robotConfig");
+        doc.appendChild(rootElement);
+
+        // Iterate through domain configurations
+        for (Map.Entry<String, Map<String, Double>> domainEntry : robotConfigs.entrySet()) {
+            String domainName = domainEntry.getKey();
+            Map<String, Double> domainConfig = domainEntry.getValue();
+
+            Element domainElement = doc.createElement(domainName);
+            rootElement.appendChild(domainElement);
+
+            // Iterate through constant configurations within the domain
+            for (Map.Entry<String, Double> constantEntry : domainConfig.entrySet()) {
+                String constantName = constantEntry.getKey();
+                Double constantValue = constantEntry.getValue();
+
+                Element constantElement = doc.createElement(constantName);
+                constantElement.appendChild(doc.createTextNode(constantValue.toString()));
+                domainElement.appendChild(constantElement);
+            }
+        }
+
+        // Write the updated XML document to the file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource(doc);
+
+        File outputFile = new File(HOME_DIR + "deploy/robotConfig.xml");
+        StreamResult result = new StreamResult(outputFile);
+
+        transformer.transform(source, result);
+
+        System.out.println("<--all changed configs are saved to" + HOME_DIR + "deploy/robotConfig.xml" + "-->");
     }
 }

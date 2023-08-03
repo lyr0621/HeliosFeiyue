@@ -17,6 +17,9 @@ import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Utils.Vector2D;
 import org.littletonrobotics.junction.LoggedRobot;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+
 /**
  * The main program of the robot
  * currently working on the chassis module, more specifically the vector-based
@@ -50,6 +53,13 @@ public class Robot extends LoggedRobot {
                 // System.out.println("<-- robot main loop -->");
                 // test.testPeriodic();
                 configReader.updateTuningConfigsFromDashboard();
+                if (new XboxController(1).getBButton()) {
+                        try {
+                                configReader.writeConfigsToXML();
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                }
         }
 
         @Override
