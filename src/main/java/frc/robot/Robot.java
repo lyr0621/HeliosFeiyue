@@ -17,9 +17,6 @@ import frc.robot.Utils.RobotConfigReader;
 import frc.robot.Utils.Vector2D;
 import org.littletonrobotics.junction.LoggedRobot;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-
 /**
  * The main program of the robot
  * currently working on the chassis module, more specifically the vector-based
@@ -33,7 +30,7 @@ import javax.xml.transform.TransformerException;
  */
 public class Robot extends LoggedRobot {
 
-        PIDTest test = new PIDTest();
+        Test test = new Test();
         /** whether the init process has completed */
         boolean initializationCompleted = false;
 
@@ -47,33 +44,20 @@ public class Robot extends LoggedRobot {
                         this.initializationCompleted = false;
                         return;
                 }
-                if (!initializationCompleted)
-                        test.testRestart();
+//                if (!initializationCompleted)
+//                        robot.restartRobot()
+                test.testPeriodic();
 
-                // System.out.println("<-- robot main loop -->");
-                // test.testPeriodic();
-                configReader.updateTuningConfigsFromDashboard();
-                if (new XboxController(1).getBButton()) {
-                        try {
-                                configReader.writeConfigsToXML();
-                        } catch (Exception e) {
-                                e.printStackTrace();
-                        }
-                }
         }
 
         @Override
         public void robotInit() {
-                try {
-                        configReader = new RobotConfigReader();
-                } catch (Exception e) {
-                        throw new RuntimeException(e);
-                }
-                // test.testStart();
-                this.initializationCompleted = true;
-
-                // testing
-                configReader.startTuningConfig("test/test1");
+//                try {
+//                        configReader = new RobotConfigReader();
+//                } catch (Exception e) {
+//                        throw new RuntimeException(e);
+//                }
+                test.testStart();
         }
 }
 
@@ -246,5 +230,39 @@ class PIDTest {
                         correctionPower = 0.3;
                 }
                 testMotor.setPower(correctionPower, null);
+        }
+}
+
+class Test {
+        private SwerveWheel testFrontLeftWheel;
+        public void testStart() {
+                RobotConfigReader robotConfig;
+                try {
+                        robotConfig = new RobotConfigReader();
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        return;
+                }
+
+                testFrontLeftWheel = new SwerveWheel();
+                HashMap<String, Object> frontLeftWheelParams = new HashMap<String, Object>(1);
+                frontLeftWheelParams.put("drivingMotorPort",
+                        robotConfig.getConfig("hardware/frontLeftWheelDriveMotor"));
+                frontLeftWheelParams.put("steerMotorPort",
+                        robotConfig.getConfig("hardware/frontLeftWheelSteerMotor"));
+                frontLeftWheelParams.put("CANCoderPort",
+                        robotConfig.getConfig("hardware/frontLeftWheelEncoder"));
+                frontLeftWheelParams.put("coderBias",
+                        robotConfig.getConfig("hardware/frontLeftWheelZeroPosition")); // TODO: null pointer error here
+                frontLeftWheelParams.put("wheelID", 1);
+                frontLeftWheelParams.put("wheelPositionVector", new Vector2D(new double[] { -1, 1 }));
+                frontLeftWheelParams.put("robotConfig", robotConfig);
+                frontLeftWheelParams.put("steerMotorReversed", robotConfig.getConfig("chassis/frontLeftWheelSteerMotorReversed"));
+                frontLeftWheelParams.put("steerEncoderReversed", robotConfig.getConfig("chassis/frontLeftWheelSteerEncoderReversed"));
+                testFrontLeftWheel.init(null, frontLeftWheelParams);
+        }
+
+        public void testPeriodic() {
+                System.out.println("wheel position:" + testFrontLeftWheel.getWheelHeading());
         }
 }

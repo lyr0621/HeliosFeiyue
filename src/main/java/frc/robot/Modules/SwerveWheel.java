@@ -133,7 +133,7 @@ public class SwerveWheel extends RobotModuleBase {
         int drivingMotorPort = (int) params.get("drivingMotorPort");
         int steerMotorPort = (int) params.get("steerMotorPort");
         int CANCoderPort = (int) params.get("CANCoderPort");
-        double motorEncoderBias = (double) params.get("coderBias");
+        double motorEncoderBias = CanCoder.simplifyAngle((double) params.get("coderBias") + Math.PI / 2);
         this.robotConfig = (RobotConfigReader) params.get("robotConfig");
 
         /* read the configuration of the robot */
